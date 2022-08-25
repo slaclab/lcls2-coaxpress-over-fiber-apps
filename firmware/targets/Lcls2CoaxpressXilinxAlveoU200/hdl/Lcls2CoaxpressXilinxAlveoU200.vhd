@@ -40,30 +40,30 @@ entity Lcls2CoaxpressXilinxAlveoU200 is
       --  Application Ports
       ---------------------
       -- QSFP[0] Ports
-      qsfp0RefClkP   : in  slv(1 downto 0);
-      qsfp0RefClkN   : in  slv(1 downto 0);
-      qsfp0RxP       : in  slv(3 downto 0);
-      qsfp0RxN       : in  slv(3 downto 0);
-      qsfp0TxP       : out slv(3 downto 0);
-      qsfp0TxN       : out slv(3 downto 0);
+      qsfp0RefClkP  : in  slv(1 downto 0);
+      qsfp0RefClkN  : in  slv(1 downto 0);
+      qsfp0RxP      : in  slv(3 downto 0);
+      qsfp0RxN      : in  slv(3 downto 0);
+      qsfp0TxP      : out slv(3 downto 0);
+      qsfp0TxN      : out slv(3 downto 0);
       -- QSFP[1] Ports
-      qsfp1RefClkP   : in  slv(1 downto 0);
-      qsfp1RefClkN   : in  slv(1 downto 0);
-      qsfp1RxP       : in  slv(3 downto 0);
-      qsfp1RxN       : in  slv(3 downto 0);
-      qsfp1TxP       : out slv(3 downto 0);
-      qsfp1TxN       : out slv(3 downto 0);
+      qsfp1RefClkP  : in  slv(1 downto 0);
+      qsfp1RefClkN  : in  slv(1 downto 0);
+      qsfp1RxP      : in  slv(3 downto 0);
+      qsfp1RxN      : in  slv(3 downto 0);
+      qsfp1TxP      : out slv(3 downto 0);
+      qsfp1TxN      : out slv(3 downto 0);
       -- -- DDR Ports
       -- ddrClkP      : in    slv(3 downto 0);
       -- ddrClkN      : in    slv(3 downto 0);
       -- ddrOut       : out   DdrOutArray(3 downto 0);
-      -- ddrInOut     : inout DdrInOutArray(3 downto 0);      
+      -- ddrInOut     : inout DdrInOutArray(3 downto 0);
       --------------
       --  Core Ports
       --------------
       -- System Ports
-      userClkP       : in  sl;
-      userClkN       : in  sl;
+      userClkP      : in  sl;
+      userClkN      : in  sl;
       -- QSFP[1:0] Ports
       qsfpFs        : out Slv2Array(1 downto 0);
       qsfpRefClkRst : out slv(1 downto 0);
@@ -72,13 +72,13 @@ entity Lcls2CoaxpressXilinxAlveoU200 is
       qsfpModSelL   : out slv(1 downto 0);
       qsfpModPrsL   : in  slv(1 downto 0);
       -- PCIe Ports
-      pciRstL        : in  sl;
-      pciRefClkP     : in  sl;
-      pciRefClkN     : in  sl;
-      pciRxP         : in  slv(15 downto 0);
-      pciRxN         : in  slv(15 downto 0);
-      pciTxP         : out slv(15 downto 0);
-      pciTxN         : out slv(15 downto 0));
+      pciRstL       : in  sl;
+      pciRefClkP    : in  sl;
+      pciRefClkN    : in  sl;
+      pciRxP        : in  slv(15 downto 0);
+      pciRxN        : in  slv(15 downto 0);
+      pciTxP        : out slv(15 downto 0);
+      pciTxN        : out slv(15 downto 0));
 end Lcls2CoaxpressXilinxAlveoU200;
 
 architecture top_level of Lcls2CoaxpressXilinxAlveoU200 is
@@ -107,9 +107,12 @@ architecture top_level of Lcls2CoaxpressXilinxAlveoU200 is
          addrBits     => 22,
          connectivity => x"FFFF"));
 
-   signal userClk156 : sl;
+   signal userClk    : sl;
+   signal userClkBuf : sl;
    signal userClk25  : sl;
    signal userRst25  : sl;
+   signal userClk250 : sl;
+   signal userRst250 : sl;
 
    signal axilClk          : sl;
    signal axilRst          : sl;
@@ -117,10 +120,10 @@ architecture top_level of Lcls2CoaxpressXilinxAlveoU200 is
    signal axilReadSlave    : AxiLiteReadSlaveType;
    signal axilWriteMaster  : AxiLiteWriteMasterType;
    signal axilWriteSlave   : AxiLiteWriteSlaveType;
-   signal axilReadMasters  : AxiLiteReadMasterArray(NUM_AXIL_MASTERS_C-1 downto 0) := (others => AXI_LITE_READ_MASTER_INIT_C);
-   signal axilReadSlaves   : AxiLiteReadSlaveArray(NUM_AXIL_MASTERS_C-1 downto 0)  := (others => AXI_LITE_READ_SLAVE_EMPTY_OK_C);
-   signal axilWriteMasters : AxiLiteWriteMasterArray(NUM_AXIL_MASTERS_C-1 downto 0):= (others => AXI_LITE_WRITE_MASTER_INIT_C);
-   signal axilWriteSlaves  : AxiLiteWriteSlaveArray(NUM_AXIL_MASTERS_C-1 downto 0) := (others => AXI_LITE_WRITE_SLAVE_EMPTY_OK_C);
+   signal axilReadMasters  : AxiLiteReadMasterArray(NUM_AXIL_MASTERS_C-1 downto 0)  := (others => AXI_LITE_READ_MASTER_INIT_C);
+   signal axilReadSlaves   : AxiLiteReadSlaveArray(NUM_AXIL_MASTERS_C-1 downto 0)   := (others => AXI_LITE_READ_SLAVE_EMPTY_OK_C);
+   signal axilWriteMasters : AxiLiteWriteMasterArray(NUM_AXIL_MASTERS_C-1 downto 0) := (others => AXI_LITE_WRITE_MASTER_INIT_C);
+   signal axilWriteSlaves  : AxiLiteWriteSlaveArray(NUM_AXIL_MASTERS_C-1 downto 0)  := (others => AXI_LITE_WRITE_SLAVE_EMPTY_OK_C);
 
    signal dmaClk        : sl;
    signal dmaRst        : sl;
@@ -153,31 +156,62 @@ architecture top_level of Lcls2CoaxpressXilinxAlveoU200 is
 
 begin
 
-   ---------------------------------------
-   -- AXI-Lite and reference 25 MHz clocks
-   ---------------------------------------
+   U_BUFG : BUFG
+      port map (
+         I => userClk,
+         O => userClkBuf);
+
+   ---------------------------
+   -- AXI-Lite clock and Reset
+   ---------------------------
    U_axilClk : entity surf.ClockManagerUltraScale
+      generic map(
+         TPD_G              => TPD_G,
+         TYPE_G             => "MMCM",
+         INPUT_BUFG_G       => false,
+         FB_BUFG_G          => true,
+         RST_IN_POLARITY_G  => '1',
+         NUM_CLOCKS_G       => 1,
+         -- MMCM attributes
+         BANDWIDTH_G        => "OPTIMIZED",
+         CLKIN_PERIOD_G     => 6.4,     -- 156.25 MHz
+         DIVCLK_DIVIDE_G    => 1,       -- 156.25 MHz = 156.25 MHz/1
+         CLKFBOUT_MULT_F_G  => 8.0,     -- 1.25GHz = 8 x 156.25 MHz
+         CLKOUT0_DIVIDE_F_G => 8.0)     -- 156.25MHz = 1.25GHz/8
+      port map(
+         -- Clock Input
+         clkIn     => userClkBuf,
+         rstIn     => dmaRst,
+         -- Clock Outputs
+         clkOut(0) => axilClk,
+         -- Reset Outputs
+         rstOut(0) => axilRst);
+
+   -----------------------------------------
+   -- Reference 25/250 MHz clocks and Resets
+   -----------------------------------------
+   U_userClk : entity surf.ClockManagerUltraScale
       generic map(
          TPD_G             => TPD_G,
          TYPE_G            => "PLL",
          INPUT_BUFG_G      => false,
          FB_BUFG_G         => true,
          RST_IN_POLARITY_G => '1',
-         NUM_CLOCKS_G      => 1,
-         -- PLL attributes
+         NUM_CLOCKS_G      => 2,
+         -- MMCM attributes
          CLKIN_PERIOD_G    => 6.4,      -- 156.25 MHz
          CLKFBOUT_MULT_G   => 8,        -- 1.25GHz = 8 x 156.25 MHz
-         CLKOUT0_DIVIDE_G  => 8,        -- 156.25MHz = 1.25GHz/8
+         CLKOUT0_DIVIDE_G  => 4,        -- 250MHz = 1.25GHz/4
          CLKOUT1_DIVIDE_G  => 50)       -- 25MHz = 1.25GHz/50
       port map(
          -- Clock Input
-         clkIn     => userClk156,
+         clkIn     => userClkBuf,
          rstIn     => dmaRst,
          -- Clock Outputs
-         clkOut(0) => axilClk,
+         clkOut(0) => userClk250,
          clkOut(1) => userClk25,
          -- Reset Outputs
-         rstOut(0) => axilRst,
+         rstOut(0) => userRst250,
          rstOut(1) => userRst25);
 
    U_Core : entity axi_pcie_core.XilinxAlveoU200Core
@@ -190,14 +224,14 @@ begin
          ------------------------
          --  Top Level Interfaces
          ------------------------
-         userClk156     => userClk156,
+         userClk156     => userClk,
          -- DMA Interfaces
          dmaClk         => dmaClk,
          dmaRst         => dmaRst,
-         dmaObMasters   => dmaMasters,
-         dmaObSlaves    => dmaSlaves,
-         dmaIbMasters   => dmaMasters,
-         dmaIbSlaves    => dmaSlaves,
+         dmaObMasters   => dmaObMasters,
+         dmaObSlaves    => dmaObSlaves,
+         dmaIbMasters   => dmaIbMasters,
+         dmaIbSlaves    => dmaIbSlaves,
          -- Application AXI-Lite Interfaces [0x00100000:0x00FFFFFF]
          appClk         => axilClk,
          appRst         => axilRst,
@@ -212,12 +246,12 @@ begin
          userClkP       => userClkP,
          userClkN       => userClkN,
          -- QSFP[1:0] Ports
-         qsfpFs        => qsfpFs,
-         qsfpRefClkRst => qsfpRefClkRst,
-         qsfpRstL      => qsfpRstL,
-         qsfpLpMode    => qsfpLpMode,
-         qsfpModSelL   => qsfpModSelL,
-         qsfpModPrsL   => qsfpModPrsL,
+         qsfpFs         => qsfpFs,
+         qsfpRefClkRst  => qsfpRefClkRst,
+         qsfpRstL       => qsfpRstL,
+         qsfpLpMode     => qsfpLpMode,
+         qsfpModSelL    => qsfpModSelL,
+         qsfpModPrsL    => qsfpModPrsL,
          -- PCIe Ports
          pciRstL        => pciRstL,
          pciRefClkP     => pciRefClkP,
@@ -335,7 +369,7 @@ begin
          -- Trigger Event streams (axilClk domain)
          eventTrigMsgMasters   => eventTrigMsgMasters,
          eventTrigMsgSlaves    => eventTrigMsgSlaves,
-         eventTrigMsgCtrl      => open, -- Using MigDmaBuffer instead
+         eventTrigMsgCtrl      => open,  -- Using MigDmaBuffer instead
          eventTimingMsgMasters => eventTimingMsgMasters,
          eventTimingMsgSlaves  => eventTimingMsgSlaves,
          -- DMA Interface (dmaClk domain)
@@ -351,17 +385,18 @@ begin
    ------------------
    U_Hsio : entity work.Hsio
       generic map (
-         TPD_G               => TPD_G,
-         DMA_AXIS_CONFIG_G   => DMA_AXIS_CONFIG_C,
-         DMA_SIZE_G          => DMA_SIZE_C,
-         AXIL_CLK_FREQ_G     => AXIL_CLK_FREQ_C,
-         AXI_BASE_ADDR_G     => AXIL_CONFIG_C(HW_INDEX_C).baseAddr)
+         TPD_G             => TPD_G,
+         DMA_AXIS_CONFIG_G => DMA_AXIS_CONFIG_C,
+         DMA_SIZE_G        => DMA_SIZE_C,
+         AXIL_CLK_FREQ_G   => AXIL_CLK_FREQ_C,
+         AXI_BASE_ADDR_G   => AXIL_CONFIG_C(HW_INDEX_C).baseAddr)
       port map (
          ------------------------
          --  Top Level Interfaces
          ------------------------
          -- Reference Clock and Reset
-         userClk156            => userClk156,
+         userClk250            => userClk250,
+         userClk156            => axilClk,
          userClk25             => userClk25,
          userRst25             => userRst25,
          -- AXI-Lite Interface (axilClk domain)
@@ -371,15 +406,19 @@ begin
          axilReadSlave         => axilReadSlaves(HW_INDEX_C),
          axilWriteMaster       => axilWriteMasters(HW_INDEX_C),
          axilWriteSlave        => axilWriteSlaves(HW_INDEX_C),
-         -- Camera Streams (axilClk domain)
-         cameraIbMaster        => cameraIbMasters(0),
-         cameraIbSlave         => cameraIbSlaves(0),
-         cameraObMaster        => cameraObMasters(0)(0),
-         cameraObSlave         => cameraObSlaves(0)(0),
-         -- Trigger / event interfaces
-         triggerClk            => axilClk,
-         triggerRst            => axilRst,
-         triggerData           => open,
+         -- Data Interface (dataClk domain)
+         dataClk               => axilClk,
+         dataRst               => axilRst,
+         dataMaster            => cameraObMasters(0)(1),  -- VC=1
+         dataSlave             => cameraObSlaves(0)(1),   -- VC=1
+         -- Config Interface (cfgClk domain)
+         cfgClk                => axilClk,
+         cfgRst                => axilRst,
+         cfgIbMaster           => cameraIbMasters(0),     -- VC=0
+         cfgIbSlave            => cameraIbSlaves(0),      -- VC=0
+         cfgObMaster           => cameraObMasters(0)(0),  -- VC=0
+         cfgObSlave            => cameraObSlaves(0)(0),   -- VC=0
+         -- Event interface
          eventClk              => axilClk,
          eventRst              => axilRst,
          eventTrigMsgMasters   => eventTrigMsgMasters,
@@ -404,5 +443,5 @@ begin
          qsfp1RxN              => qsfp1RxN,
          qsfp1TxP              => qsfp1TxP,
          qsfp1TxN              => qsfp1TxN);
-         
+
 end top_level;

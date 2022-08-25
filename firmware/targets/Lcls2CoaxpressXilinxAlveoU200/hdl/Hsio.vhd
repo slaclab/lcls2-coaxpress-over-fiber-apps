@@ -34,6 +34,7 @@ library surf;
 use surf.StdRtlPkg.all;
 use surf.AxiLitePkg.all;
 use surf.AxiStreamPkg.all;
+use surf.CoaXPressPkg.all;
 
 library lcls_timing_core;
 use lcls_timing_core.TimingPkg.all;
@@ -44,18 +45,19 @@ use l2si_core.L2SiPkg.all;
 -- Library that this module belongs to
 library lcls2_pgp_fw_lib;
 
-entity Kcu1500Hsio is
+entity Hsio is
    generic (
-      TPD_G                          : time                        := 1 ns;
-      DMA_AXIS_CONFIG_G              : AxiStreamConfigType;
-      AXIL_CLK_FREQ_G                : real                        := 156.25E+6;  -- units of Hz
-      AXI_BASE_ADDR_G                : slv(31 downto 0)            := x"0080_0000";
-      DMA_SIZE_G                     : integer range 1 to 4        := 1);
+      TPD_G             : time                 := 1 ns;
+      DMA_AXIS_CONFIG_G : AxiStreamConfigType;
+      AXIL_CLK_FREQ_G   : real                 := 156.25E+6;  -- units of Hz
+      AXI_BASE_ADDR_G   : slv(31 downto 0)     := x"0080_0000";
+      DMA_SIZE_G        : integer range 1 to 4 := 1);
    port (
       ------------------------
       --  Top Level Interfaces
       ------------------------
       -- Reference Clock and Reset
+      userClk250            : in  sl;
       userClk156            : in  sl;
       userClk25             : in  sl;
       userRst25             : in  sl;
@@ -66,21 +68,24 @@ entity Kcu1500Hsio is
       axilReadSlave         : out AxiLiteReadSlaveType;
       axilWriteMaster       : in  AxiLiteWriteMasterType;
       axilWriteSlave        : out AxiLiteWriteSlaveType;
-      -- Camera Streams (axilClk domain)
-      cameraIbMaster          : in  AxiStreamMasterType;
-      cameraIbSlave           : out AxiStreamSlaveType;
-      cameraObMaster          : out AxiStreamMasterType;
-      cameraObSlave           : in  AxiStreamSlaveType;
-      -- Trigger Interface
-      triggerClk            : in  sl;
-      triggerRst            : in  sl;
-      triggerData           : out TriggerEventDataArray(DMA_SIZE_G-1 downto 0);
+      -- Data Interface (dataClk domain)
+      dataClk               : in  sl;
+      dataRst               : in  sl;
+      dataMaster            : out AxiStreamMasterType;
+      dataSlave             : in  AxiStreamSlaveType;
+      -- Config Interface (cfgClk domain)
+      cfgClk                : in  sl;
+      cfgRst                : in  sl;
+      cfgIbMaster           : in  AxiStreamMasterType;
+      cfgIbSlave            : out AxiStreamSlaveType;
+      cfgObMaster           : out AxiStreamMasterType;
+      cfgObSlave            : in  AxiStreamSlaveType;
       -- L1 trigger feedback (optional)
-      l1Clk                 : in  sl                                                 := '0';
-      l1Rst                 : in  sl                                                 := '0';
+      l1Clk                 : in  sl                                            := '0';
+      l1Rst                 : in  sl                                            := '0';
       l1Feedbacks           : in  TriggerL1FeedbackArray(DMA_SIZE_G-1 downto 0) := (others => TRIGGER_L1_FEEDBACK_INIT_C);
       l1Acks                : out slv(DMA_SIZE_G-1 downto 0);
-      -- Event streams
+      -- Event streams (eventClk domain)
       eventClk              : in  sl;
       eventRst              : in  sl;
       eventTrigMsgMasters   : out AxiStreamMasterArray(DMA_SIZE_G-1 downto 0);
@@ -93,32 +98,37 @@ entity Kcu1500Hsio is
       --  Kcu1500Hsio Ports
       ---------------------
       -- QSFP[0] Ports
-      qsfp0RefClkP          : in  slv(1 downto 0)                                    := (others => '0');
-      qsfp0RefClkN          : in  slv(1 downto 0)                                    := (others => '0');
-      qsfp0RxP              : in  slv(3 downto 0)                                    := (others => '0');
-      qsfp0RxN              : in  slv(3 downto 0)                                    := (others => '0');
-      qsfp0TxP              : out slv(3 downto 0)                                    := (others => '0');
-      qsfp0TxN              : out slv(3 downto 0)                                    := (others => '0');
+      qsfp0RefClkP          : in  slv(1 downto 0)                               := (others => '0');
+      qsfp0RefClkN          : in  slv(1 downto 0)                               := (others => '0');
+      qsfp0RxP              : in  slv(3 downto 0)                               := (others => '0');
+      qsfp0RxN              : in  slv(3 downto 0)                               := (others => '0');
+      qsfp0TxP              : out slv(3 downto 0)                               := (others => '0');
+      qsfp0TxN              : out slv(3 downto 0)                               := (others => '0');
       -- QSFP[1] Ports
-      qsfp1RefClkP          : in  slv(1 downto 0)                                    := (others => '0');
-      qsfp1RefClkN          : in  slv(1 downto 0)                                    := (others => '0');
-      qsfp1RxP              : in  slv(3 downto 0)                                    := (others => '0');
-      qsfp1RxN              : in  slv(3 downto 0)                                    := (others => '0');
-      qsfp1TxP              : out slv(3 downto 0)                                    := (others => '0');
-      qsfp1TxN              : out slv(3 downto 0)                                    := (others => '0'));
-end Kcu1500Hsio;
+      qsfp1RefClkP          : in  slv(1 downto 0)                               := (others => '0');
+      qsfp1RefClkN          : in  slv(1 downto 0)                               := (others => '0');
+      qsfp1RxP              : in  slv(3 downto 0)                               := (others => '0');
+      qsfp1RxN              : in  slv(3 downto 0)                               := (others => '0');
+      qsfp1TxP              : out slv(3 downto 0)                               := (others => '0');
+      qsfp1TxN              : out slv(3 downto 0)                               := (others => '0'));
+end Hsio;
 
-architecture mapping of Kcu1500Hsio is
+architecture mapping of Hsio is
 
    constant CAMERA_INDEX_C     : natural  := 0;
-   constant TIMING_INDEX_C     : natural  := 1;
-   constant NUM_AXIL_MASTERS_C : positive := 2;
+   constant QPLL_INDEX_C       : natural  := 1;
+   constant TIMING_INDEX_C     : natural  := 2;
+   constant NUM_AXIL_MASTERS_C : positive := 3;
 
    -- 22 Bits available
    constant AXIL_CONFIG_C : AxiLiteCrossbarMasterConfigArray(NUM_AXIL_MASTERS_C-1 downto 0) := (
-      CAMERA_INDEX_C   => (
+      CAMERA_INDEX_C  => (
          baseAddr     => (AXI_BASE_ADDR_G+x"0000_0000"),
-         addrBits     => 20,
+         addrBits     => 19,
+         connectivity => x"FFFF"),
+      QPLL_INDEX_C    => (
+         baseAddr     => (AXI_BASE_ADDR_G+x"0008_0000"),
+         addrBits     => 19,
          connectivity => x"FFFF"),
       TIMING_INDEX_C  => (
          baseAddr     => (AXI_BASE_ADDR_G+x"0010_0000"),
@@ -135,11 +145,13 @@ architecture mapping of Kcu1500Hsio is
    signal qpllRefclk : Slv2Array(3 downto 0);
    signal qpllRst    : Slv2Array(3 downto 0);
 
-   signal refClk    : slv(3 downto 0);
    signal iTriggerData       : TriggerEventDataArray(DMA_SIZE_G-1 downto 0);
    signal remoteTriggersComb : slv(DMA_SIZE_G-1 downto 0);
    signal remoteTriggers     : slv(DMA_SIZE_G-1 downto 0);
-   signal triggerCodes       : slv8Array(DMA_SIZE_G-1 downto 0);
+
+   signal refClk156 : sl;
+   signal trigClk   : sl;
+   signal trigRst   : sl;
 
 begin
 
@@ -167,71 +179,90 @@ begin
    ------------------------
    -- GT Clocking
    ------------------------
-   GEN_REFCLK :
-   for i in 1 downto 0 generate
-
-      U_QsfpRef0 : IBUFDS_GTE4
-         generic map (
-            REFCLK_EN_TX_PATH  => '0',
-            REFCLK_HROW_CK_SEL => "00",  -- 2'b00: ODIV2 = O
-            REFCLK_ICNTL_RX    => "00")
-         port map (
-            I     => qsfp0RefClkP(i),
-            IB    => qsfp0RefClkN(i),
-            CEB   => '0',
-            ODIV2 => open,
-            O     => refClk((2*i)+0));
-
-      U_QsfpRef1 : IBUFDS_GTE4
-         generic map (
-            REFCLK_EN_TX_PATH  => '0',
-            REFCLK_HROW_CK_SEL => "00",  -- 2'b00: ODIV2 = O
-            REFCLK_ICNTL_RX    => "00")
-         port map (
-            I     => qsfp1RefClkP(i),
-            IB    => qsfp1RefClkN(i),
-            CEB   => '0',
-            ODIV2 => open,
-            O     => refClk((2*i)+1));
-
-   end generate GEN_REFCLK;
-
-   --------------
-   -- PGP Modules
-   --------------
-   U_Lane : entity surf.Pgp4Lane
+   U_refClk156 : IBUFDS_GTE4
       generic map (
-         TPD_G                => TPD_G,
-         RATE_G               => RATE_G,
-         DMA_AXIS_CONFIG_G    => DMA_AXIS_CONFIG_G,
-         AXIL_CLK_FREQ_G      => AXIL_CLK_FREQ_G,
-         AXI_BASE_ADDR_G      => AXIL_CONFIG_C(i).baseAddr)
+         REFCLK_EN_TX_PATH  => '0',
+         REFCLK_HROW_CK_SEL => "00",    -- 2'b00: ODIV2 = O
+         REFCLK_ICNTL_RX    => "00")
       port map (
-         -- Trigger Interface
-         trigger         => remoteTriggers(i),
-         triggerCode     => triggerCodes(i),
-         -- QPLL Interface
-         qpllLock        => qpllLock(i),
-         qpllClk         => qpllClk(i),
-         qpllRefclk      => qpllRefclk(i),
-         qpllRst         => qpllRst(i),
-         -- PGP Serial Ports
-         pgpRxP          => qsfp0RxP(i),
-         pgpRxN          => qsfp0RxN(i),
-         pgpTxP          => qsfp0TxP(i),
-         pgpTxN          => qsfp0TxN(i),
-         -- Streaming Interface (axilClk domain)
-         pgpIbMaster     => pgpIbMasters(i),
-         pgpIbSlave      => pgpIbSlaves(i),
-         pgpObMasters    => pgpObMasters(i),
-         pgpObSlaves     => pgpObSlaves(i),
+         I     => qsfp0RefClkP(1),
+         IB    => qsfp0RefClkN(1),
+         CEB   => '0',
+         ODIV2 => open,
+         O     => refClk156);
+
+   U_QPLL : entity surf.CoaXPressGtyUsQpll
+      generic map (
+         TPD_G      => TPD_G,
+         CXP_RATE_G => CXP_12_C)
+      port map (
+         -- Stable Clock and Reset
+         stableClk       => axilClk,
+         stableRst       => axilRst,
+         -- QPLL Clocking
+         refClk156       => refClk156,
+         refClk250       => userClk250,
+         qpllLock        => qpllLock,
+         qpllClk         => qpllClk,
+         qpllRefclk      => qpllRefclk,
+         qpllRst         => qpllRst,
          -- AXI-Lite Interface (axilClk domain)
          axilClk         => axilClk,
          axilRst         => axilRst,
-         axilReadMaster  => axilReadMasters(i),
-         axilReadSlave   => axilReadSlaves(i),
-         axilWriteMaster => axilWriteMasters(i),
-         axilWriteSlave  => axilWriteSlaves(i));
+         axilReadMaster  => axilReadMasters(QPLL_INDEX_C),
+         axilReadSlave   => axilReadSlaves(QPLL_INDEX_C),
+         axilWriteMaster => axilWriteMasters(QPLL_INDEX_C),
+         axilWriteSlave  => axilWriteSlaves(QPLL_INDEX_C));
+
+   -------------
+   -- CXP Module
+   -------------
+   U_CXP : entity surf.CoaXPressGtyUs
+      generic map (
+         TPD_G              => TPD_G,
+         CXP_RATE_G         => CXP_12_C,
+         NUM_LANES_G        => 4,
+         STATUS_CNT_WIDTH_G => 12,
+         AXIS_CONFIG_G      => DMA_AXIS_CONFIG_G,
+         AXIL_BASE_ADDR_G   => AXIL_CONFIG_C(CAMERA_INDEX_C).baseAddr,
+         AXIL_CLK_FREQ_G    => AXIL_CLK_FREQ_G)
+      port map (
+         -- Stable Clock and Reset
+         stableClk25     => userClk25,
+         stableRst25     => userRst25,
+         -- QPLL Interface
+         qpllLock        => qpllLock,
+         qpllClk         => qpllClk,
+         qpllRefclk      => qpllRefclk,
+         qpllRst         => qpllRst,
+         -- GT Ports
+         gtRxP           => qsfp0RxP,
+         gtRxN           => qsfp0RxN,
+         gtTxP           => qsfp0TxP,
+         gtTxN           => qsfp0TxN,
+         -- Trigger Interface (trigClk domain)
+         trigClk         => trigClk,
+         trigRst         => trigRst,
+         trigger         => remoteTriggers(0),
+         -- Data Interface (dataClk domain)
+         dataClk         => dataClk,
+         dataRst         => dataRst,
+         dataMaster      => dataMaster,
+         dataSlave       => dataSlave,
+         -- Config Interface (cfgClk domain)
+         cfgClk          => cfgClk,
+         cfgRst          => cfgRst,
+         cfgIbMaster     => cfgIbMaster,
+         cfgIbSlave      => cfgIbSlave,
+         cfgObMaster     => cfgObMaster,
+         cfgObSlave      => cfgObSlave,
+         -- AXI-Lite Interface (axilClk domain)
+         axilClk         => axilClk,
+         axilRst         => axilRst,
+         axilReadMaster  => axilReadMasters(CAMERA_INDEX_C),
+         axilReadSlave   => axilReadSlaves(CAMERA_INDEX_C),
+         axilWriteMaster => axilWriteMasters(CAMERA_INDEX_C),
+         axilWriteSlave  => axilWriteSlaves(CAMERA_INDEX_C));
 
    ------------------
    -- Timing Receiver
@@ -252,22 +283,23 @@ begin
          userClk25             => userClk25,
          userRst25             => userRst25,
          -- Trigger interface
-         triggerClk            => triggerClk,           
-         triggerRst            => triggerRst,           
-         triggerData           => iTriggerData,         
-         l1Clk                 => l1Clk,                
-         l1Rst                 => l1Rst,                
-         l1Feedbacks           => l1Feedbacks,          
-         l1Acks                => l1Acks,               
+         triggerClk            => trigClk,
+         triggerRst            => trigRst,
+         triggerData           => iTriggerData,
+         -- Trigger interface
+         l1Clk                 => l1Clk,
+         l1Rst                 => l1Rst,
+         l1Feedbacks           => l1Feedbacks,
+         l1Acks                => l1Acks,
          -- Event interface
-         eventClk              => eventClk,             
-         eventRst              => eventRst,             
-         eventTrigMsgMasters   => eventTrigMsgMasters,  
-         eventTrigMsgSlaves    => eventTrigMsgSlaves,   
-         eventTrigMsgCtrl      => eventTrigMsgCtrl,     
+         eventClk              => eventClk,
+         eventRst              => eventRst,
+         eventTrigMsgMasters   => eventTrigMsgMasters,
+         eventTrigMsgSlaves    => eventTrigMsgSlaves,
+         eventTrigMsgCtrl      => eventTrigMsgCtrl,
          eventTimingMsgMasters => eventTimingMsgMasters,
-         eventTimingMsgSlaves  => eventTimingMsgSlaves, 
-         clearReadout          => clearReadout,         
+         eventTimingMsgSlaves  => eventTimingMsgSlaves,
+         clearReadout          => clearReadout,
          -- AXI-Lite Interface (axilClk domain)
          axilClk               => axilClk,
          axilRst               => axilRst,
@@ -286,23 +318,20 @@ begin
    -----------------------------------
    TRIGGER_GEN : for i in DMA_SIZE_G-1 downto 0 generate
       remoteTriggersComb(i) <= iTriggerData(i).valid and iTriggerData(i).l0Accept;
-      triggerCodes(i)       <= "000" & iTriggerData(i).l0Tag;
    end generate TRIGGER_GEN;
    U_RegisterVector_1 : entity surf.RegisterVector
       generic map (
          TPD_G   => TPD_G,
          WIDTH_G => DMA_SIZE_G)
       port map (
-         clk   => triggerClk,        
+         clk   => trigClk,
          sig_i => remoteTriggersComb,
-         reg_o => remoteTriggers);   
-
-   triggerData <= iTriggerData;
+         reg_o => remoteTriggers);
 
    --------------------
    -- Unused QSFP Links
    --------------------
-   U_QSFP1 : entity surf.Gthe3ChannelDummy
+   U_QSFP1 : entity surf.Gtye4ChannelDummy
       generic map (
          TPD_G   => TPD_G,
          WIDTH_G => 2)
