@@ -18,3 +18,6 @@ loadConstraints -dir "$::DIR_PATH/hdl"
 
 # Updating impl_1 strategy
 set_property strategy Performance_ExplorePostRoutePhysOpt [get_runs impl_1]
+
+# Load the simulation testbed
+set_property top {CoaXPressCrcTb} [get_filesets sim_1]

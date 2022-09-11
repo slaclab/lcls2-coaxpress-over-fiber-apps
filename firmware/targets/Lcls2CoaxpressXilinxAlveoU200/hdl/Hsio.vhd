@@ -57,7 +57,6 @@ entity Hsio is
       --  Top Level Interfaces
       ------------------------
       -- Reference Clock and Reset
-      userClk250            : in  sl;
       userClk156            : in  sl;
       userClk25             : in  sl;
       userRst25             : in  sl;
@@ -116,19 +115,14 @@ end Hsio;
 architecture mapping of Hsio is
 
    constant CAMERA_INDEX_C     : natural  := 0;
-   constant QPLL_INDEX_C       : natural  := 1;
-   constant TIMING_INDEX_C     : natural  := 2;
-   constant NUM_AXIL_MASTERS_C : positive := 3;
+   constant TIMING_INDEX_C     : natural  := 1;
+   constant NUM_AXIL_MASTERS_C : positive := 2;
 
    -- 22 Bits available
    constant AXIL_CONFIG_C : AxiLiteCrossbarMasterConfigArray(NUM_AXIL_MASTERS_C-1 downto 0) := (
       CAMERA_INDEX_C  => (
          baseAddr     => (AXI_BASE_ADDR_G+x"0000_0000"),
-         addrBits     => 19,
-         connectivity => x"FFFF"),
-      QPLL_INDEX_C    => (
-         baseAddr     => (AXI_BASE_ADDR_G+x"0008_0000"),
-         addrBits     => 19,
+         addrBits     => 20,
          connectivity => x"FFFF"),
       TIMING_INDEX_C  => (
          baseAddr     => (AXI_BASE_ADDR_G+x"0010_0000"),
@@ -140,18 +134,18 @@ architecture mapping of Hsio is
    signal axilReadMasters  : AxiLiteReadMasterArray(NUM_AXIL_MASTERS_C-1 downto 0);
    signal axilReadSlaves   : AxiLiteReadSlaveArray(NUM_AXIL_MASTERS_C-1 downto 0)  := (others => AXI_LITE_READ_SLAVE_EMPTY_DECERR_C);
 
-   signal qpllLock   : Slv2Array(3 downto 0);
-   signal qpllClk    : Slv2Array(3 downto 0);
-   signal qpllRefclk : Slv2Array(3 downto 0);
+   signal qpllLock   : slv(1 downto 0);
+   signal qpllClk    : slv(1 downto 0);
+   signal qpllRefclk : slv(1 downto 0);
    signal qpllRst    : Slv2Array(3 downto 0);
+   signal qpllReset  : slv(1 downto 0);
 
    signal iTriggerData       : TriggerEventDataArray(DMA_SIZE_G-1 downto 0);
-   signal remoteTriggersComb : slv(DMA_SIZE_G-1 downto 0);
-   signal remoteTriggers     : slv(DMA_SIZE_G-1 downto 0);
+   signal remoteTriggersComb : slv(DMA_SIZE_G-1 downto 0) := (others => '0');
+   signal remoteTriggers     : slv(DMA_SIZE_G-1 downto 0) := (others => '0');
 
-   signal refClk156 : sl;
-   signal trigClk   : sl;
-   signal trigRst   : sl;
+   signal trigClk : sl;
+   signal trigRst : sl;
 
 begin
 
@@ -176,43 +170,25 @@ begin
          mAxiReadMasters     => axilReadMasters,
          mAxiReadSlaves      => axilReadSlaves);
 
-   ------------------------
+   --------------
    -- GT Clocking
-   ------------------------
-   U_refClk156 : IBUFDS_GTE4
+   --------------
+   U_QPLL : entity surf.TenGigEthGtyUltraScaleClk
       generic map (
-         REFCLK_EN_TX_PATH  => '0',
-         REFCLK_HROW_CK_SEL => "00",    -- 2'b00: ODIV2 = O
-         REFCLK_ICNTL_RX    => "00")
+         TPD_G => TPD_G)
       port map (
-         I     => qsfp0RefClkP(1),
-         IB    => qsfp0RefClkN(1),
-         CEB   => '0',
-         ODIV2 => open,
-         O     => refClk156);
+         -- MGT Clock Port
+         gtClkP        => qsfp0RefClkP(1),
+         gtClkN        => qsfp0RefClkN(1),
+         coreRst       => axilRst,
+         -- Quad PLL Ports
+         qplllock      => qplllock,
+         qplloutclk    => qpllClk,
+         qplloutrefclk => qpllRefclk,
+         qpllRst       => qpllReset);
 
-   U_QPLL : entity surf.CoaXPressGtyUsQpll
-      generic map (
-         TPD_G      => TPD_G,
-         CXP_RATE_G => CXP_12_C)
-      port map (
-         -- Stable Clock and Reset
-         stableClk       => axilClk,
-         stableRst       => axilRst,
-         -- QPLL Clocking
-         refClk156       => refClk156,
-         refClk250       => userClk250,
-         qpllLock        => qpllLock,
-         qpllClk         => qpllClk,
-         qpllRefclk      => qpllRefclk,
-         qpllRst         => qpllRst,
-         -- AXI-Lite Interface (axilClk domain)
-         axilClk         => axilClk,
-         axilRst         => axilRst,
-         axilReadMaster  => axilReadMasters(QPLL_INDEX_C),
-         axilReadSlave   => axilReadSlaves(QPLL_INDEX_C),
-         axilWriteMaster => axilWriteMasters(QPLL_INDEX_C),
-         axilWriteSlave  => axilWriteSlaves(QPLL_INDEX_C));
+   qpllReset(0) <= (qpllRst(0)(0) or qpllRst(1)(0) or qpllRst(2)(0) or qpllRst(3)(0)) and not(qPllLock(0));
+   qpllReset(1) <= (qpllRst(0)(1) or qpllRst(1)(1) or qpllRst(2)(1) or qpllRst(3)(1)) and not(qPllLock(1));
 
    -------------
    -- CXP Module
@@ -222,18 +198,16 @@ begin
          TPD_G              => TPD_G,
          CXP_RATE_G         => CXP_12_C,
          NUM_LANES_G        => 4,
+         TRIG_WIDTH_G       => 1,
          STATUS_CNT_WIDTH_G => 12,
          AXIS_CONFIG_G      => DMA_AXIS_CONFIG_G,
          AXIL_BASE_ADDR_G   => AXIL_CONFIG_C(CAMERA_INDEX_C).baseAddr,
          AXIL_CLK_FREQ_G    => AXIL_CLK_FREQ_G)
       port map (
-         -- Stable Clock and Reset
-         stableClk25     => userClk25,
-         stableRst25     => userRst25,
          -- QPLL Interface
-         qpllLock        => qpllLock,
-         qpllClk         => qpllClk,
-         qpllRefclk      => qpllRefclk,
+         qpllLock        => (others => qpllLock),
+         qpllClk         => (others => qpllClk),
+         qpllRefclk      => (others => qpllRefclk),
          qpllRst         => qpllRst,
          -- GT Ports
          gtRxP           => qsfp0RxP,
@@ -243,7 +217,7 @@ begin
          -- Trigger Interface (trigClk domain)
          trigClk         => trigClk,
          trigRst         => trigRst,
-         trigger         => remoteTriggers(0),
+         trigger         => remoteTriggers,
          -- Data Interface (dataClk domain)
          dataClk         => dataClk,
          dataRst         => dataRst,

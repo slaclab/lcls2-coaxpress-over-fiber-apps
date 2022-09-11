@@ -1,0 +1,111 @@
+Root:
+  Fpga:
+    #########################################################################################################
+    Application:
+      AppLane[:]:
+        EventBuilder:
+          Bypass: 0x4 # Masking off XPM Timing message port because not implemented in LCLS-I mode
+          Timeout: 0x0
+          Blowoff: True # Flush the downstream data/trigger pipelines
+    #########################################################################################################
+    Hsio:
+      ######################################
+      TimingRx:
+        ######################################
+        TimingFrameRx:
+          ClkSel: LCLS-I Clock
+          ModeSel: Lcls1Protocol
+          RxDown: 0x0 # Reset the latching register
+        ######################################
+        XpmMiniWrapper:
+        ######################################
+          TPGMiniCore:
+            TxPolarity: 0x0
+            TxLoopback: 0x0
+            TxInhibit: 0x0
+            BaseControl: 0xc8
+            PulseIdWr: 0x0
+            PulseIdSet: 0x0
+            TStampWr: 0x0
+            TStampSet: 0x0
+            FixedRateDiv[0]: 0x1
+            FixedRateDiv[1]: 0xd
+            FixedRateDiv[2]: 0x5b
+            FixedRateDiv[3]: 0x38e
+            FixedRateDiv[4]: 0x238c
+            FixedRateDiv[5]: 0x16378
+            FixedRateDiv[6]: 0xde2b0
+            FixedRateDiv[7]: 0x0
+            FixedRateDiv[8]: 0x0
+            FixedRateDiv[9]: 0x0
+            RateReload: 0x0
+            TxReset: 0x0
+            CountIntervalReset: 0x0
+            Lcls1BsaNumSamples: 0x0
+            Lcls1BsaRate: 120Hz
+            Lcls1BsaTimeSlot: TS1
+            Lcls1BsaSeverity: INVALID
+            Lcls1BsaEdefSlot: 0x0
+            Lcls1BsaNumAvgs: 0x0
+            Lcls1BsaStart: 0x0
+            BsaCompleteWr: 0x0
+            BsaActive[0]: 0x0
+            BsaRateSelMode[0]: FixedRate
+            BsaFixedRate[0]: 1MHz
+            BsaACRate[0]: 60Hz
+            BsaACTSMask[0]: 0x3f
+            BsaSequenceSelect[0]: 0x0
+            BsaSequenceBitSelect[0]: 0x0
+            BsaDestMode[0]: Dont_Care
+            BsaDestInclusiveMask[0]: 0xffff
+            BsaDestExclusiveMask[0]: 0xffff
+            BsaNtoAvg[0]: 0x1
+            BsaAvgToWr[0]: 0x64
+            BsaMaxSeverity[0]: Invalid
+            CountInterval: 0x488b
+        ######################################
+          XpmMini:
+            Link: 0
+            TxPllReset: 0x0
+            Loopback: False
+            TxReset: 0x0
+            RxReset: 0x0
+            HwEnable: False
+            Config_L0Select_Reset: 0x0
+            Config_L0Select_Enabled: True
+            AxilRdEn: True
+            Config_L0Select_RateSel: '100 Hz'
+            Config_L0Select_DestSel: 0x8000
+            Pipeline_Depth_Clks: 20000
+            Pipeline_Depth_Fids: 100
+            PartitionMessage_Hdr: 0x0
+        ######################################
+        TriggerEventManager:
+          ###################
+          TriggerEventBuffer[:]:
+            MasterEnable: True
+          ###################
+          EvrV2CoreTriggers:
+          ###################
+            EvrV2ChannelReg[:]:
+              EnableReg: True
+              RateType: ControlWord
+              # RateSel: 40 # 120 Hz
+              # RateSel: 41 #  60 Hz
+              # RateSel: 42 #  30 Hz
+              RateSel: 43 #  10 Hz
+              # RateSel: 44 #   5 Hz
+              # RateSel: 45 #   1 Hz
+              DestType: All
+              DestSel: 0x0
+            ###################
+            EvrV2TriggerReg[:]:
+              EnableTrig: True
+              Source: 0x0
+              Polarity: Rising
+              ComplEn: Disabled
+              ComplAnd: LogicOR
+              Delay: 0x0
+              Width: 0x1
+            ###################
+    #########################################################################################################

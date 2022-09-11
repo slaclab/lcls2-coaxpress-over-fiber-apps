@@ -40,19 +40,19 @@ entity Lcls2CoaxpressXilinxAlveoU200 is
       --  Application Ports
       ---------------------
       -- QSFP[0] Ports
-      qsfp0RefClkP  : in  slv(1 downto 0);
-      qsfp0RefClkN  : in  slv(1 downto 0);
-      qsfp0RxP      : in  slv(3 downto 0);
-      qsfp0RxN      : in  slv(3 downto 0);
-      qsfp0TxP      : out slv(3 downto 0);
-      qsfp0TxN      : out slv(3 downto 0);
+      qsfp0RefClkP  : in    slv(1 downto 0);
+      qsfp0RefClkN  : in    slv(1 downto 0);
+      qsfp0RxP      : in    slv(3 downto 0);
+      qsfp0RxN      : in    slv(3 downto 0);
+      qsfp0TxP      : out   slv(3 downto 0);
+      qsfp0TxN      : out   slv(3 downto 0);
       -- QSFP[1] Ports
-      qsfp1RefClkP  : in  slv(1 downto 0);
-      qsfp1RefClkN  : in  slv(1 downto 0);
-      qsfp1RxP      : in  slv(3 downto 0);
-      qsfp1RxN      : in  slv(3 downto 0);
-      qsfp1TxP      : out slv(3 downto 0);
-      qsfp1TxN      : out slv(3 downto 0);
+      qsfp1RefClkP  : in    slv(1 downto 0);
+      qsfp1RefClkN  : in    slv(1 downto 0);
+      qsfp1RxP      : in    slv(3 downto 0);
+      qsfp1RxN      : in    slv(3 downto 0);
+      qsfp1TxP      : out   slv(3 downto 0);
+      qsfp1TxN      : out   slv(3 downto 0);
       -- -- DDR Ports
       -- ddrClkP      : in    slv(3 downto 0);
       -- ddrClkN      : in    slv(3 downto 0);
@@ -62,23 +62,26 @@ entity Lcls2CoaxpressXilinxAlveoU200 is
       --  Core Ports
       --------------
       -- System Ports
-      userClkP      : in  sl;
-      userClkN      : in  sl;
+      userClkP      : in    sl;
+      userClkN      : in    sl;
+      i2cRstL       : out   sl;
+      i2cScl        : inout sl;
+      i2cSda        : inout sl;
       -- QSFP[1:0] Ports
-      qsfpFs        : out Slv2Array(1 downto 0);
-      qsfpRefClkRst : out slv(1 downto 0);
-      qsfpRstL      : out slv(1 downto 0);
-      qsfpLpMode    : out slv(1 downto 0);
-      qsfpModSelL   : out slv(1 downto 0);
-      qsfpModPrsL   : in  slv(1 downto 0);
+      qsfpFs        : out   Slv2Array(1 downto 0);
+      qsfpRefClkRst : out   slv(1 downto 0);
+      qsfpRstL      : out   slv(1 downto 0);
+      qsfpLpMode    : out   slv(1 downto 0);
+      qsfpModSelL   : out   slv(1 downto 0);
+      qsfpModPrsL   : in    slv(1 downto 0);
       -- PCIe Ports
-      pciRstL       : in  sl;
-      pciRefClkP    : in  sl;
-      pciRefClkN    : in  sl;
-      pciRxP        : in  slv(15 downto 0);
-      pciRxN        : in  slv(15 downto 0);
-      pciTxP        : out slv(15 downto 0);
-      pciTxN        : out slv(15 downto 0));
+      pciRstL       : in    sl;
+      pciRefClkP    : in    sl;
+      pciRefClkN    : in    sl;
+      pciRxP        : in    slv(15 downto 0);
+      pciRxN        : in    slv(15 downto 0);
+      pciTxP        : out   slv(15 downto 0);
+      pciTxN        : out   slv(15 downto 0));
 end Lcls2CoaxpressXilinxAlveoU200;
 
 architecture top_level of Lcls2CoaxpressXilinxAlveoU200 is
@@ -107,12 +110,9 @@ architecture top_level of Lcls2CoaxpressXilinxAlveoU200 is
          addrBits     => 22,
          connectivity => x"FFFF"));
 
-   signal userClk    : sl;
-   signal userClkBuf : sl;
+   signal userClk156 : sl;
    signal userClk25  : sl;
    signal userRst25  : sl;
-   signal userClk250 : sl;
-   signal userRst250 : sl;
 
    signal axilClk          : sl;
    signal axilRst          : sl;
@@ -156,62 +156,32 @@ architecture top_level of Lcls2CoaxpressXilinxAlveoU200 is
 
 begin
 
-   U_BUFG : BUFG
-      port map (
-         I => userClk,
-         O => userClkBuf);
-
    ---------------------------
    -- AXI-Lite clock and Reset
    ---------------------------
    U_axilClk : entity surf.ClockManagerUltraScale
       generic map(
-         TPD_G              => TPD_G,
-         TYPE_G             => "MMCM",
-         INPUT_BUFG_G       => false,
-         FB_BUFG_G          => true,
-         RST_IN_POLARITY_G  => '1',
-         NUM_CLOCKS_G       => 1,
-         -- MMCM attributes
-         BANDWIDTH_G        => "OPTIMIZED",
-         CLKIN_PERIOD_G     => 6.4,     -- 156.25 MHz
-         DIVCLK_DIVIDE_G    => 1,       -- 156.25 MHz = 156.25 MHz/1
-         CLKFBOUT_MULT_F_G  => 8.0,     -- 1.25GHz = 8 x 156.25 MHz
-         CLKOUT0_DIVIDE_F_G => 8.0)     -- 156.25MHz = 1.25GHz/8
-      port map(
-         -- Clock Input
-         clkIn     => userClkBuf,
-         rstIn     => dmaRst,
-         -- Clock Outputs
-         clkOut(0) => axilClk,
-         -- Reset Outputs
-         rstOut(0) => axilRst);
-
-   -----------------------------------------
-   -- Reference 25/250 MHz clocks and Resets
-   -----------------------------------------
-   U_userClk : entity surf.ClockManagerUltraScale
-      generic map(
          TPD_G             => TPD_G,
          TYPE_G            => "PLL",
-         INPUT_BUFG_G      => false,
+         INPUT_BUFG_G      => true,
          FB_BUFG_G         => true,
          RST_IN_POLARITY_G => '1',
          NUM_CLOCKS_G      => 2,
          -- MMCM attributes
+         BANDWIDTH_G       => "OPTIMIZED",
          CLKIN_PERIOD_G    => 6.4,      -- 156.25 MHz
          CLKFBOUT_MULT_G   => 8,        -- 1.25GHz = 8 x 156.25 MHz
-         CLKOUT0_DIVIDE_G  => 4,        -- 250MHz = 1.25GHz/4
+         CLKOUT0_DIVIDE_G  => 8,        -- 156.25MHz = 1.25GHz/8
          CLKOUT1_DIVIDE_G  => 50)       -- 25MHz = 1.25GHz/50
       port map(
          -- Clock Input
-         clkIn     => userClkBuf,
+         clkIn     => userClk156,
          rstIn     => dmaRst,
          -- Clock Outputs
-         clkOut(0) => userClk250,
+         clkOut(0) => axilClk,
          clkOut(1) => userClk25,
          -- Reset Outputs
-         rstOut(0) => userRst250,
+         rstOut(0) => axilRst,
          rstOut(1) => userRst25);
 
    U_Core : entity axi_pcie_core.XilinxAlveoU200Core
@@ -224,7 +194,7 @@ begin
          ------------------------
          --  Top Level Interfaces
          ------------------------
-         userClk156     => userClk,
+         userClk156     => userClk156,
          -- DMA Interfaces
          dmaClk         => dmaClk,
          dmaRst         => dmaRst,
@@ -245,6 +215,9 @@ begin
          -- System Ports
          userClkP       => userClkP,
          userClkN       => userClkN,
+         i2cRstL        => i2cRstL,
+         i2cScl         => i2cScl,
+         i2cSda         => i2cSda,
          -- QSFP[1:0] Ports
          qsfpFs         => qsfpFs,
          qsfpRefClkRst  => qsfpRefClkRst,
@@ -395,7 +368,6 @@ begin
          --  Top Level Interfaces
          ------------------------
          -- Reference Clock and Reset
-         userClk250            => userClk250,
          userClk156            => axilClk,
          userClk25             => userClk25,
          userRst25             => userRst25,
