@@ -200,9 +200,10 @@ begin
          NUM_LANES_G        => 4,
          TRIG_WIDTH_G       => 1,
          STATUS_CNT_WIDTH_G => 12,
-         AXIS_CONFIG_G      => DMA_AXIS_CONFIG_G,
          AXIL_BASE_ADDR_G   => AXIL_CONFIG_C(CAMERA_INDEX_C).baseAddr,
-         AXIL_CLK_FREQ_G    => AXIL_CLK_FREQ_G)
+         AXIL_CLK_FREQ_G    => AXIL_CLK_FREQ_G,
+         AXIS_CLK_FREQ_G    => AXIL_CLK_FREQ_G,
+         AXIS_CONFIG_G      => DMA_AXIS_CONFIG_G)
       port map (
          -- QPLL Interface
          qpllLock        => (others => qpllLock),
