@@ -12,6 +12,7 @@
 import pyrogue as pr
 import rogue
 import click
+import time
 
 import axipcie
 import lcls2_coaxpress_apps     as clDev
@@ -43,6 +44,7 @@ class Root(shared.Root):
         self.dev            = dev
         self.startupMode    = startupMode
         self.standAloneMode = standAloneMode
+        self.cameraType     = cameraType
         self.defaultFile    = []
 
         # Check for simulation
@@ -64,36 +66,36 @@ class Root(shared.Root):
         # Create memory interface
         self._memMap = axipcie.createAxiPcieMemMap(dev, 'localhost', 8000)
         self._memMap.setName('PCIe_Bar0')
-        
+
         # Create and the configuration stream to the camera
-        if (cameraType != None):
-            
+        if (self.cameraType != None):
+
             # Create the DMA configuration stream
             if (dev != 'sim'):
                 self._configStream = rogue.hardware.axi.AxiStreamDma(dev,0,1)
             else:
                 self._configStream = rogue.interfaces.stream.TcpClient('localhost', (8000+2))
-            
+
             # Create the SRPv3
             self._srp = rogue.protocols.srp.SrpV3()
-            
+
             # Connect DMA to SRPv3
             self._configStream == self._srp
-            
+
             # Add the camera bootstrap
             self.add(coaxpress.Bootstrap(
                 memBase = self._srp,
                 expand  = True,
                 enabled = False,
-            ))            
-            
+            ))
+
             # Add the camera device
-            if cameraType == 'PhantomS991':
+            if self.cameraType == 'PhantomS991':
                 self.add(coaxpress.PhantomS991(
                     memBase = self._srp,
                     expand  = True,
                     enabled = False,
-                ))            
+                ))
 
         # Instantiate the top level Device and pass it the memory map
         self.add(clDev.Fpga(
@@ -154,14 +156,22 @@ class Root(shared.Root):
             # Update the run state status variable
             self.RunState.set(True)
 
-    # def start(self, **kwargs):
-        # super().start(**kwargs)
+    def start(self, **kwargs):
+        super().start(**kwargs)
 
-        # # Useful pointer
-        # timingRx = self.Fpga.Hsio.TimingRx
+        # Useful pointer
+        timingRx = self.Fpga.Hsio.TimingRx
 
-        # # Check if not simulation
-        # if (self.dev != 'sim'):
+        # Check if not simulation
+        if (self.dev != 'sim'):
+
+            # Connection reset
+            self.Bootstrap.enable.set(True)
+            self.Bootstrap.ConnectionReset()
+            time.sleep(0.5)
+            if self.cameraType == 'PhantomS991':
+                self.PhantomS991.enable.set(True)
+            self.ReadAll()
 
             # # Start up the timing system = LCLS-II mode
             # if self.startupMode:
