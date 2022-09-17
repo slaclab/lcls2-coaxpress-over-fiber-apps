@@ -53,8 +53,7 @@ SetDebugCoreClk ${ilaName} {U_Hsio/axilClk}
 ## Set the debug Probes
 #######################
 
-ConfigProbe ${ilaName} {U_Hsio/U_QPLL/GtyUltraScaleQuadPll_Inst/qPllLock[*]}
-ConfigProbe ${ilaName} {U_Hsio/U_QPLL/GtyUltraScaleQuadPll_Inst/qPllReset[*]}
+
 ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Config/axilReadMaster[araddr][*]}
 ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Config/axilWriteMaster[awaddr][*]}
 ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Config/axilWriteMaster[wdata][*]}
@@ -71,6 +70,9 @@ ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Config/r[axilReadSlave][rvalid]}
 ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Config/r[axilWriteSlave][awready]}
 ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Config/r[axilWriteSlave][bvalid]}
 ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Config/r[axilWriteSlave][wready]}
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Config/cfgRxMaster[tData][*]}
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Config/cfgRxMaster[tValid]}
+
 
 ##########################
 ## Write the port map file
@@ -94,7 +96,7 @@ CreateDebugCore ${ilaName}
 #######################
 ## Set the record depth
 #######################
-set_property C_DATA_DEPTH 4096 [get_debug_cores ${ilaName}]
+set_property C_DATA_DEPTH 1024 [get_debug_cores ${ilaName}]
 
 #################################
 ## Set the clock for the ILA core
@@ -177,7 +179,7 @@ CreateDebugCore ${ilaName}
 #######################
 ## Set the record depth
 #######################
-set_property C_DATA_DEPTH 4096 [get_debug_cores ${ilaName}]
+set_property C_DATA_DEPTH 1024 [get_debug_cores ${ilaName}]
 
 #################################
 ## Set the clock for the ILA core
@@ -233,7 +235,7 @@ CreateDebugCore ${ilaName}
 #######################
 ## Set the record depth
 #######################
-set_property C_DATA_DEPTH 4096 [get_debug_cores ${ilaName}]
+set_property C_DATA_DEPTH 1024 [get_debug_cores ${ilaName}]
 
 #################################
 ## Set the clock for the ILA core

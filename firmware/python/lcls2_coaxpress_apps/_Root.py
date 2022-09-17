@@ -67,6 +67,15 @@ class Root(shared.Root):
         self._memMap = axipcie.createAxiPcieMemMap(dev, 'localhost', 8000)
         self._memMap.setName('PCIe_Bar0')
 
+        # Instantiate the top level Device and pass it the memory map
+        self.add(clDev.Fpga(
+            memBase      = self._memMap,
+            enLclsI      = enLclsI,
+            enLclsII     = enLclsII,
+            boardType    = pcieBoardType,
+            expand       = True,
+        ))
+
         # Create and the configuration stream to the camera
         if (self.cameraType != None):
 
@@ -84,9 +93,10 @@ class Root(shared.Root):
 
             # Add the camera bootstrap
             self.add(coaxpress.Bootstrap(
-                memBase = self._srp,
-                expand  = True,
-                enabled = False,
+                memBase        = self._srp,
+                CoaXPressAxiL  = self.Fpga.Hsio.CoaXPressAxiL,
+                expand         = True,
+                enabled        = False,
             ))
 
             # Add the camera device
@@ -96,15 +106,6 @@ class Root(shared.Root):
                     expand  = True,
                     enabled = False,
                 ))
-
-        # Instantiate the top level Device and pass it the memory map
-        self.add(clDev.Fpga(
-            memBase      = self._memMap,
-            enLclsI      = enLclsI,
-            enLclsII     = enLclsII,
-            boardType    = pcieBoardType,
-            expand       = True,
-        ))
 
         # Add local variables
         self.add(pr.LocalVariable(
@@ -167,8 +168,9 @@ class Root(shared.Root):
 
             # Connection reset
             self.Bootstrap.enable.set(True)
-            self.Bootstrap.ConnectionReset()
-            time.sleep(0.5)
+            self.Bootstrap.DeviceDiscovery()
+
+            # Check for different camera types
             if self.cameraType == 'PhantomS991':
                 self.PhantomS991.enable.set(True)
             self.ReadAll()
