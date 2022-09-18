@@ -91,7 +91,7 @@ if __name__ == "__main__":
         default  = 'XilinxAlveoU200',
         help     = "define the type of PCIe card, used to select I2C mapping. Options: [none or SlacPgpCardG4 or Kcu1500]",
     )
-    
+
     parser.add_argument(
         "--cameraType",
         type     = str,
@@ -99,7 +99,7 @@ if __name__ == "__main__":
         # default  = None,
         default  = 'PhantomS991',
         help     = "define the type of camera",
-    )    
+    )
 
     parser.add_argument(
         "--serverPort",
@@ -173,7 +173,7 @@ if __name__ == "__main__":
             pyrogue.pydm.runPyDM(
                 root  = root,
                 sizeX = 800,
-                sizeY = 1000,
+                sizeY = 800,
             )
 
         #################

@@ -141,7 +141,7 @@ ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_Bridge/GEN_
 ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_Bridge/GEN_TX.U_Tx/r[state][*]}
 ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_Bridge/GEN_TX.U_Tx/r[txHsData][*]}
 ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_Bridge/GEN_TX.U_Tx/r[txLsData][*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_Bridge/GEN_TX.U_Tx/r[txLsLaneEn][*]}
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_Bridge/GEN_TX.U_Tx/txLsLaneEn[*]}
 ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_Bridge/GEN_TX.U_Tx/r[txLsDataK]}
 ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_Bridge/GEN_TX.U_Tx/r[xgmiiTxc][*]}
 ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_Bridge/GEN_TX.U_Tx/r[xgmiiTxd][*]}
