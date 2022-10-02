@@ -102,6 +102,9 @@ WORD[6]BIT[15:00] = PixelF
 WORD[6]BIT[31:16] = TapG
 ```
 
+THe SURF firmware does `NOT` touch the raw pixel data format and passes downstream to the CPU in its native `BIG` endianness format.  
+Refer to ["10.4 CoaXPress Image Streams"](http://jiia.org/wp-content/themes/jiia/pdf/standard_dl/coaxpress/CXP-001-2021.pdf)
+for the native format defination.
 
 <!--- ######################################################## -->
 
