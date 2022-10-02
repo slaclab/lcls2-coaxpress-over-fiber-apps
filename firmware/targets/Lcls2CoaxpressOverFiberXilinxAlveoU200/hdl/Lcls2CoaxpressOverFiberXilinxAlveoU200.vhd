@@ -31,7 +31,7 @@ use axi_pcie_core.MigPkg.all;
 library unisim;
 use unisim.vcomponents.all;
 
-entity Lcls2CoaxpressXilinxAlveoU200 is
+entity Lcls2CoaxpressOverFiberXilinxAlveoU200 is
    generic (
       TPD_G        : time := 1 ns;
       BUILD_INFO_G : BuildInfoType);
@@ -82,9 +82,9 @@ entity Lcls2CoaxpressXilinxAlveoU200 is
       pciRxN        : in    slv(15 downto 0);
       pciTxP        : out   slv(15 downto 0);
       pciTxN        : out   slv(15 downto 0));
-end Lcls2CoaxpressXilinxAlveoU200;
+end Lcls2CoaxpressOverFiberXilinxAlveoU200;
 
-architecture top_level of Lcls2CoaxpressXilinxAlveoU200 is
+architecture top_level of Lcls2CoaxpressOverFiberXilinxAlveoU200 is
 
    constant DMA_AXIS_CONFIG_C : AxiStreamConfigType := ssiAxiStreamConfig(512/8);  -- 512-bit interface
    constant AXIL_CLK_FREQ_C   : real                := 156.25E+6;  -- units of Hz
