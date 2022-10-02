@@ -44,10 +44,10 @@ $ git clone --recursive git@github.com:slaclab/lcls2-coaxpress-over-fiber-apps
 # Dual QSFP PCIe Card's Fiber mapping
 
 ```
-QSFP[0][0] = PGP.Lane[0].VC[3:0]
-QSFP[0][1] = PGP.Lane[1].VC[3:0]
-QSFP[0][2] = PGP.Lane[2].VC[3:0]
-QSFP[0][3] = PGP.Lane[3].VC[3:0]
+QSFP[0][0] = CXPoF.Lane[0]
+QSFP[0][1] = CXPoF.Lane[1]
+QSFP[0][2] = CXPoF.Lane[2]
+QSFP[0][3] = CXPoF.Lane[3]
 QSFP[1][0] = LCLS-I  Timing Receiver
 QSFP[1][1] = LCLS-II Timing Receiver
 QSFP[1][2] = Unused QSFP Link
