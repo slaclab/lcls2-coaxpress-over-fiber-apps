@@ -2,11 +2,10 @@ Root:
   Fpga:
     #########################################################################################################
     Application:
-      AppLane[:]:
-        EventBuilder:
-          Bypass: 0x0
-          Timeout: 0x0
-          Blowoff: True # Flush the downstream data/trigger pipelines
+      EventBuilder:
+        Bypass: 0x0
+        Timeout: 0x0
+        Blowoff: True # Flush the downstream data/trigger pipelines
     #########################################################################################################
     Hsio:
       ######################################

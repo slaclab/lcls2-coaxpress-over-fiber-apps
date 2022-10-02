@@ -10,7 +10,6 @@
 import pyrogue as pr
 
 import axipcie                 as pcie
-import lcls2_pgp_fw_lib.shared as shared
 import lcls2_coaxpress_apps    as clDev
 import surf.axi                as axi
 
@@ -38,13 +37,10 @@ class Fpga(pr.Device):
         ))
 
         # Application layer
-        self.add(shared.Application(
+        self.add(clDev.Application(
             offset     = 0x00C0_0000,
-            numLanes   = 1,
             expand     = True,
         ))
-        self.Application.AppLane[0].VcDataTap.hidden = True
-        self.Application.AppLane[0].XpmPauseThresh.hidden = True
 
         # Hardware Layer
         self.add(clDev.Hsio(

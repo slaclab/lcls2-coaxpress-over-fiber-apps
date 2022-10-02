@@ -11,6 +11,7 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 
+from lcls2_coaxpress_apps._Application import *
 from lcls2_coaxpress_apps._Hsio import *
 from lcls2_coaxpress_apps._Fpga import *
 from lcls2_coaxpress_apps._Root import *

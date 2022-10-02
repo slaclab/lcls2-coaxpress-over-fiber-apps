@@ -2,11 +2,10 @@ Root:
   Fpga:
     #########################################################################################################
     Application:
-      AppLane[:]:
-        EventBuilder:
-          Bypass: 0x4 # Masking off XPM Timing message port because not implemented in LCLS-I mode
-          Timeout: 0x0
-          Blowoff: True # Flush the downstream data/trigger pipelines
+      EventBuilder:
+        Bypass: 0x4 # Masking off XPM Timing message port because not implemented in LCLS-I mode
+        Timeout: 0x0
+        Blowoff: True # Flush the downstream data/trigger pipelines
     #########################################################################################################
     Hsio:
       ######################################
@@ -90,10 +89,10 @@ Root:
             EvrV2ChannelReg[:]:
               EnableReg: True
               RateType: ControlWord
-              # RateSel: 40 # 120 Hz
+              RateSel: 40 # 120 Hz
               # RateSel: 41 #  60 Hz
               # RateSel: 42 #  30 Hz
-              RateSel: 43 #  10 Hz
+              # RateSel: 43 #  10 Hz
               # RateSel: 44 #   5 Hz
               # RateSel: 45 #   1 Hz
               DestType: All
