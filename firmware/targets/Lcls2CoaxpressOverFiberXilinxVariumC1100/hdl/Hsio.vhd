@@ -95,23 +95,23 @@ entity Hsio is
       eventTimingMsgMasters : out AxiStreamMasterArray(DMA_SIZE_G-1 downto 0);
       eventTimingMsgSlaves  : in  AxiStreamSlaveArray(DMA_SIZE_G-1 downto 0);
       clearReadout          : out slv(DMA_SIZE_G-1 downto 0);
-      --------------
-      --  U200 Ports
-      --------------
+      ------------------
+      --  Hardware Ports
+      ------------------
       -- QSFP[0] Ports
-      qsfp0RefClkP          : in  slv(1 downto 0)                               := (others => '0');
-      qsfp0RefClkN          : in  slv(1 downto 0)                               := (others => '0');
-      qsfp0RxP              : in  slv(3 downto 0)                               := (others => '0');
-      qsfp0RxN              : in  slv(3 downto 0)                               := (others => '0');
-      qsfp0TxP              : out slv(3 downto 0)                               := (others => '0');
-      qsfp0TxN              : out slv(3 downto 0)                               := (others => '0');
+      qsfp0RefClkP          : in  sl                                    := '0';
+      qsfp0RefClkN          : in  sl                                    := '0';
+      qsfp0RxP              : in  slv(3 downto 0)                                    := (others => '0');
+      qsfp0RxN              : in  slv(3 downto 0)                                    := (others => '0');
+      qsfp0TxP              : out slv(3 downto 0)                                    := (others => '0');
+      qsfp0TxN              : out slv(3 downto 0)                                    := (others => '0');
       -- QSFP[1] Ports
-      qsfp1RefClkP          : in  slv(1 downto 0)                               := (others => '0');
-      qsfp1RefClkN          : in  slv(1 downto 0)                               := (others => '0');
-      qsfp1RxP              : in  slv(3 downto 0)                               := (others => '0');
-      qsfp1RxN              : in  slv(3 downto 0)                               := (others => '0');
-      qsfp1TxP              : out slv(3 downto 0)                               := (others => '0');
-      qsfp1TxN              : out slv(3 downto 0)                               := (others => '0'));
+      qsfp1RefClkP          : in  sl                                    := '0';
+      qsfp1RefClkN          : in  sl                                   := '0';
+      qsfp1RxP              : in  slv(3 downto 0)                                    := (others => '0');
+      qsfp1RxN              : in  slv(3 downto 0)                                    := (others => '0');
+      qsfp1TxP              : out slv(3 downto 0)                                    := (others => '0');
+      qsfp1TxN              : out slv(3 downto 0)                                    := (others => '0'));
 end Hsio;
 
 architecture mapping of Hsio is
@@ -149,6 +149,10 @@ architecture mapping of Hsio is
    signal trigClk : sl;
    signal trigRst : sl;
 
+   signal qsfp0RefClk    : sl;
+   signal qsfp0RefClkBuf : sl;
+   signal gtRefClk       : sl;
+
 begin
 
    ---------------------
@@ -175,13 +179,56 @@ begin
    --------------
    -- GT Clocking
    --------------
+   U_IBUFDS : IBUFDS_GTE4
+      generic map (
+         REFCLK_EN_TX_PATH  => '0',
+         REFCLK_HROW_CK_SEL => "00",    -- 2'b00: ODIV2 = O
+         REFCLK_ICNTL_RX    => "00")
+      port map (
+         I     => qsfp0RefClkP,
+         IB    => qsfp0RefClkN,
+         CEB   => '0',
+         ODIV2 => qsfp0RefClk,
+         O     => open);
+
+   U_BUFG_GT : BUFG_GT
+      port map (
+         I       => qsfp0RefClk,
+         CE      => '1',
+         CEMASK  => '1',
+         CLR     => '0',
+         CLRMASK => '1',
+         DIV     => "000",
+         O       => qsfp0RefClkBuf);
+
+   U_gtRefClk : entity surf.ClockManagerUltraScale
+      generic map(
+         TPD_G              => TPD_G,
+         TYPE_G             => "MMCM",
+         INPUT_BUFG_G       => false,
+         FB_BUFG_G          => true,
+         RST_IN_POLARITY_G  => '1',
+         NUM_CLOCKS_G       => 1,
+         -- MMCM attributes
+         BANDWIDTH_G        => "OPTIMIZED",
+         CLKIN_PERIOD_G     => 6.206,   -- 161.1328125MHz
+         DIVCLK_DIVIDE_G    => 11,      -- 14.6484375MHz = 161.1328125MHz/11
+         CLKFBOUT_MULT_F_G  => 80.0,    -- 1171.875MHz = 80 x 14.6484375MHz
+         CLKOUT0_DIVIDE_F_G => 7.5)     -- 156.25MHz = 1171.875MHz/7.5
+      port map(
+         -- Clock Input
+         clkIn     => qsfp0RefClkBuf,
+         rstIn     => axilRst,
+         -- Clock Outputs
+         clkOut(0) => gtRefClk);
+
    U_QPLL : entity surf.TenGigEthGtyUltraScaleClk
       generic map (
-         TPD_G => TPD_G)
+         TPD_G             => TPD_G,
+         QPLL_REFCLK_SEL_G => "111")
       port map (
          -- MGT Clock Port
-         gtClkP        => qsfp0RefClkP(1),
-         gtClkN        => qsfp0RefClkN(1),
+         gtRefClk      => gtRefClk,
          coreRst       => axilRst,
          -- Quad PLL Ports
          qplllock      => qplllock,

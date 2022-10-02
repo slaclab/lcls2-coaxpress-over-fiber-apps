@@ -38,7 +38,7 @@ class Root(shared.Root):
         **kwargs):
 
         # Set the firmware Version lock = firmware/targets/shared_version.mk
-        self.FwVersionLock = 0x07150000
+        self.FwVersionLock = 0x01000000
 
         # Set local variables
         self.dev            = dev
@@ -175,9 +175,19 @@ class Root(shared.Root):
         if (self.dev != 'sim'):
 
             ###############################################################
+
             print ( '###################################################')
             axiVersion.printStatus()
             print ( '###################################################')
+            fwVersion = AxiVersion.FpgaVersion.get()
+            if (fwVersion != self.FwVersionLock):
+                errMsg = f"""
+                    PCIe.AxiVersion.FpgaVersion = {fwVersion:#04x} != {self.FwVersionLock:#04x}
+                    Please update PCIe firmware using software/scripts/updatePcieFpga.py
+                    """
+                click.secho(errMsg, bg='red')
+                raise ValueError(errMsg)
+
             ###############################################################
 
             # Connection reset
@@ -210,9 +220,15 @@ class Root(shared.Root):
                 else:
                     timingRx.ConfigLclsTimingV1()
 
-            # Load the YAML configurations
+            ######################################################################
+            # Commented out and loading individual YAML files due to new rogue bug
+            ######################################################################
+            # https://jira.slac.stanford.edu/browse/ESROGUE-603
+            ######################################################################
+            # # Load the YAML configurations
             # self.defaultFile.extend(defaultFile)
             # print( f'Loading {self.defaultFile} Configuration File...' )
+            ######################################################################
             self.LoadConfig(self.defaultFile)
             self.LoadConfig(defaultFile)
 
