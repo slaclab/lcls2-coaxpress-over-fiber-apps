@@ -9,9 +9,9 @@
 #-----------------------------------------------------------------------------
 import pyrogue as pr
 
-import axipcie                 as pcie
-import lcls2_coaxpress_apps    as clDev
-import surf.axi                as axi
+import axipcie                         as pcie
+import lcls2_coaxpress_over_fiber_apps as clDev
+import surf.axi                        as axi
 
 class Fpga(pr.Device):
     def __init__(self,

@@ -15,11 +15,11 @@ import click
 import time
 
 import axipcie
-import lcls2_coaxpress_apps     as clDev
-import lcls2_pgp_fw_lib.shared  as shared
-import surf.protocols.batcher   as batcher
-import surf.protocols.coaxpress as coaxpress
-import l2si_core                as l2si
+import lcls2_coaxpress_over_fiber_apps as clDev
+import lcls2_pgp_fw_lib.shared         as shared
+import surf.protocols.batcher          as batcher
+import surf.protocols.coaxpress        as coaxpress
+import l2si_core                       as l2si
 
 rogue.Version.minVersion('5.15.0')
 

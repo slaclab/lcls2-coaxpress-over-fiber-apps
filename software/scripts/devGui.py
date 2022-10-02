@@ -62,8 +62,7 @@ if __name__ == "__main__":
         "--standAloneMode",
         type     = argBool,
         required = False,
-        # default  = False, # Default: False = using fiber timing
-        default  = True, # Default: True = locally generated timing
+        default  = False, # Default: False = using fiber timing
         help     = "False = using fiber timing, True = locally generated timing",
     )
 
@@ -136,7 +135,7 @@ if __name__ == "__main__":
         import lcls2_pgp_fw_lib
         import lcls_timing_core
         import l2si_core
-        import lcls2_coaxpress_apps
+        import lcls2_coaxpress_over_fiber_apps
         import surf
 
     # Otherwise assume it is relative in a standard development directory structure
@@ -149,11 +148,11 @@ if __name__ == "__main__":
             import setupLibPaths
 
     # Load the cameralink-gateway package
-    import lcls2_coaxpress_apps
+    import lcls2_coaxpress_over_fiber_apps
 
     #################################################################
 
-    with lcls2_coaxpress_apps.Root(
+    with lcls2_coaxpress_over_fiber_apps.Root(
             dev            = args.dev,
             pollEn         = args.pollEn,
             initRead       = args.initRead,
