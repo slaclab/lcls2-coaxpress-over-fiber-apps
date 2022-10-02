@@ -72,6 +72,39 @@ DMA.DEST[255:2] = Unused
 
 <!--- ######################################################## -->
 
+# Camera and Its Header Format
+
+The SURF `CoaXPressRxHsFsm.vhd` firmware formats the camera header into a compact, 7 x 32-bit (little endianness) message.
+Refer to [Table 47 ― Rectangular image header](http://jiia.org/wp-content/themes/jiia/pdf/standard_dl/coaxpress/CXP-001-2021.pdf)
+for header term definations 
+
+```
+WORD[0]BIT[07:00] = StreamID
+WORD[0]BIT[15:08] = Flags
+WORD[0]BIT[31:16] = SourceTag
+
+WORD[1]BIT[23:00] = Xsize
+WORD[1]BIT[31:24] = 0x0 (zeros)
+
+WORD[2]BIT[23:00] = Xoffs
+WORD[2]BIT[31:24] = 0x0 (zeros)
+
+WORD[3]BIT[23:00] = Ysize
+WORD[3]BIT[31:24] = 0x0 (zeros)
+
+WORD[4]BIT[23:00] = Yoffs
+WORD[4]BIT[31:24] = 0x0 (zeros)
+
+WORD[5]BIT[23:00] = DsizeL
+WORD[5]BIT[31:24] = 0x0 (zeros)
+
+WORD[6]BIT[15:00] = PixelF
+WORD[6]BIT[31:16] = TapG
+```
+
+
+<!--- ######################################################## -->
+
 # How to build the PCIe firmware
 
 1) Setup Xilinx licensing
