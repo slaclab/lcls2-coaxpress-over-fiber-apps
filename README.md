@@ -1,7 +1,5 @@
 # lcls2-coaxpress-over-fiber-apps
 
-# lcls2-coaxpress-over-fiber-apps
-
 <!--- ######################################################## -->
 
 # Before you clone the GIT repository
