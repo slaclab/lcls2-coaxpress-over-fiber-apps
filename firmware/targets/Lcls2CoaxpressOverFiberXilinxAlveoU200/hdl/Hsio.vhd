@@ -192,13 +192,12 @@ begin
    qpllReset(0) <= (qpllRst(0)(0) or qpllRst(1)(0) or qpllRst(2)(0) or qpllRst(3)(0)) and not(qPllLock(0));
    qpllReset(1) <= (qpllRst(0)(1) or qpllRst(1)(1) or qpllRst(2)(1) or qpllRst(3)(1)) and not(qPllLock(1));
 
-   -------------
-   -- CXP Module
-   -------------
-   U_CXP : entity surf.CoaXPressGtyUs
+   ---------------
+   -- CXPoF Module
+   ---------------
+   U_CXPoF : entity surf.CoaxpressOverFiberGtyUs
       generic map (
          TPD_G              => TPD_G,
-         CXP_RATE_G         => CXP_12_C,
          NUM_LANES_G        => 4,
          STATUS_CNT_WIDTH_G => 12,
          AXIL_BASE_ADDR_G   => AXIL_CONFIG_C(CAMERA_INDEX_C).baseAddr,
