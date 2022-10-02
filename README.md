@@ -59,7 +59,7 @@ QSFP[1][3] = Unused QSFP Link
 # DMA channel mapping
 
 ```
-DMA.DEST[0] = SRPv3 for coaxpress camera configuration
+DMA.DEST[0] = Coaxpress Camera Configuration Stream
 DMA.DEST[1] = Event Builder Batcher (super-frame)
 DMA.DEST[1].DEST[0] = XPM Trigger Message (sub-frame)
 DMA.DEST[1].DEST[1] = XPM Transition Message (sub-frame)
