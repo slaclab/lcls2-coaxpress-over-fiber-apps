@@ -84,7 +84,7 @@ end Lcls2CoaxpressOverFiberXilinxAlveoU200;
 
 architecture top_level of Lcls2CoaxpressOverFiberXilinxAlveoU200 is
 
-   constant DMA_AXIS_CONFIG_C : AxiStreamConfigType := ssiAxiStreamConfig(512/8);  -- 512-bit interface
+   constant DMA_AXIS_CONFIG_C : AxiStreamConfigType := ssiAxiStreamConfig(256/8);  -- 256-bit interface
    constant AXIL_CLK_FREQ_C   : real                := 156.25E+6;  -- units of Hz
    constant DMA_SIZE_C        : positive            := 1;
 

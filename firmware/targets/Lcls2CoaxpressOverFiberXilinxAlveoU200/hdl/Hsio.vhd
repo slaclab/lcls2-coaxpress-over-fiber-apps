@@ -175,7 +175,7 @@ begin
    --------------
    -- GT Clocking
    --------------
-   U_QPLL : entity surf.TenGigEthGtyUltraScaleClk
+   U_QPLL : entity surf.CoaxpressOverFiberGtyUsQpll
       generic map (
          TPD_G => TPD_G)
       port map (
@@ -200,6 +200,7 @@ begin
          TPD_G              => TPD_G,
          NUM_LANES_G        => 4,
          STATUS_CNT_WIDTH_G => 12,
+         RX_FSM_CNT_WIDTH_C => 15,  -- Optimize this down w.r.t camera to help make timing in CoaXPressRxHsFsm.vhd
          AXIL_BASE_ADDR_G   => AXIL_CONFIG_C(CAMERA_INDEX_C).baseAddr,
          AXIL_CLK_FREQ_G    => AXIL_CLK_FREQ_G,
          AXIS_CLK_FREQ_G    => AXIL_CLK_FREQ_G,

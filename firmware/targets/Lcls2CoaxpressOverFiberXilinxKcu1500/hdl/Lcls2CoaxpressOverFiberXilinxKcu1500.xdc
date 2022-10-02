@@ -8,25 +8,11 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-set_property CONFIG_VOLTAGE 1.8                        [current_design]
-set_property BITSTREAM.CONFIG.CONFIGFALLBACK Enable    [current_design]
-set_property BITSTREAM.GENERAL.COMPRESS TRUE           [current_design]
-set_property CONFIG_MODE SPIx4                         [current_design]
-set_property BITSTREAM.CONFIG.SPI_BUSWIDTH 4           [current_design]
-set_property BITSTREAM.CONFIG.CONFIGRATE 63.8          [current_design]
-set_property BITSTREAM.CONFIG.EXTMASTERCCLK_EN disable [current_design]
-set_property BITSTREAM.CONFIG.SPI_FALL_EDGE YES        [current_design]
-set_property BITSTREAM.CONFIG.UNUSEDPIN Pullup         [current_design]
-set_property BITSTREAM.CONFIG.SPI_32BIT_ADDR Yes       [current_design]
-
-set_property USER_SLR_ASSIGNMENT SLR1 [get_cells {U_Hsio}]
-set_property USER_SLR_ASSIGNMENT SLR0 [get_cells {U_HbmDmaBuffer}]
-
 #### Base Clocks
-create_generated_clock -name clk156 [get_pins {U_axilClk/MmcmGen.U_Mmcm/CLKOUT0}]
-create_generated_clock -name clk25  [get_pins {U_userClk25/PllGen.U_Pll/CLKOUT0}]
+create_generated_clock -name clk156 [get_pins {U_axilClk/PllGen.U_Pll/CLKOUT0}]
+create_generated_clock -name clk25  [get_pins {U_axilClk/PllGen.U_Pll/CLKOUT1}]
 
-set_property CLOCK_DEDICATED_ROUTE BACKBONE [get_nets U_userClk25/clkOut[0]]
+set_property CLOCK_DEDICATED_ROUTE BACKBONE [get_nets U_axilClk/clkOut[1]]
 
 create_generated_clock -name clk238 [get_pins -hier -filter {name =~ */U_TimingRx/GEN_MMCM.U_238MHz/MmcmGen.U_Mmcm/CLKOUT0}]
 create_generated_clock -name clk371 [get_pins -hier -filter {name =~ */U_TimingRx/GEN_MMCM.U_371MHz/MmcmGen.U_Mmcm/CLKOUT0}]
@@ -36,22 +22,22 @@ create_generated_clock -name clk186 [get_pins -hier -filter {name =~ */U_TimingR
 
 #### GT Out Clocks
 create_clock -name timingGtRxOutClk0  -period 8.403 \
-    [get_pins -hier -filter {name =~ */U_TimingRx/GEN_VEC[0].REAL_PCIE.U_GTY/*/RXOUTCLK}]
+    [get_pins -hier -filter {name =~ */U_TimingRx/GEN_VEC[0].REAL_PCIE.U_GTH/*/RXOUTCLK}]
 
 create_generated_clock -name timingGtTxOutClk0 \
-    [get_pins -hier -filter {name =~ */U_TimingRx/GEN_VEC[0].REAL_PCIE.U_GTY/*/TXOUTCLK}]
+    [get_pins -hier -filter {name =~ */U_TimingRx/GEN_VEC[0].REAL_PCIE.U_GTH/*/TXOUTCLK}]
 
-# create_generated_clock -name timingTxOutClk0 \
-    # [get_pins -hier -filter {name =~ */U_TimingRx/GEN_VEC[0].U_refClkDiv2/O}]
+create_generated_clock -name timingTxOutClk0 \
+    [get_pins -hier -filter {name =~ */U_TimingRx/GEN_VEC[0].REAL_PCIE.U_GTH/LOCREF_G.TIMING_TXCLK_BUFG_GT/O}]
 
 create_clock -name timingGtRxOutClk1  -period 5.384 \
-    [get_pins -hier -filter {name =~ */U_TimingRx/GEN_VEC[1].REAL_PCIE.U_GTY/*/RXOUTCLK}]
+    [get_pins -hier -filter {name =~ */U_TimingRx/GEN_VEC[1].REAL_PCIE.U_GTH/*/RXOUTCLK}]
 
 create_generated_clock -name timingGtTxOutClk1 \
-    [get_pins -hier -filter {name =~ */U_TimingRx/GEN_VEC[1].REAL_PCIE.U_GTY/*/TXOUTCLK}]
+    [get_pins -hier -filter {name =~ */U_TimingRx/GEN_VEC[1].REAL_PCIE.U_GTH/*/TXOUTCLK}]
 
-# create_generated_clock -name timingTxOutClk1 \
-    # [get_pins -hier -filter {name =~ */U_TimingRx/GEN_VEC[1].U_refClkDiv2/O}]
+create_generated_clock -name timingTxOutClk1 \
+    [get_pins -hier -filter {name =~ */U_TimingRx/GEN_VEC[1].REAL_PCIE.U_GTH/LOCREF_G.TIMING_TXCLK_BUFG_GT/O}]
 
 
 #### Cascaded clock muxing - GEN_VEC[0] RX mux
@@ -75,7 +61,7 @@ create_generated_clock -name muxTxClk119 \
     [get_pins -hier -filter {name =~ */U_TimingRx/GEN_VEC[0].U_TXCLK/O}]
 
 create_generated_clock -name muxTimingTxOutClk0 \
-    -divide_by 1 -add -master_clock clk119 \
+    -divide_by 1 -add -master_clock timingTxOutClk0 \
     -source [get_pins -hier -filter {name =~ */U_TimingRx/GEN_VEC[0].U_TXCLK/I0}] \
     [get_pins -hier -filter {name =~ */U_TimingRx/GEN_VEC[0].U_TXCLK/O}]
 
@@ -104,7 +90,7 @@ create_generated_clock -name muxTxClk186 \
     [get_pins -hier -filter {name =~ */U_TimingRx/GEN_VEC[1].U_TXCLK/O}]
 
 create_generated_clock -name muxTimingTxOutClk1 \
-    -divide_by 1 -add -master_clock clk186 \
+    -divide_by 1 -add -master_clock timingTxOutClk1 \
     -source [get_pins -hier -filter {name =~ */U_TimingRx/GEN_VEC[1].U_TXCLK/I0}] \
     [get_pins -hier -filter {name =~ */U_TimingRx/GEN_VEC[1].U_TXCLK/O}]
 
@@ -164,7 +150,7 @@ create_generated_clock -name casMuxTimingTxOutClk1 \
 
 set_clock_groups -physically_exclusive \
     -group casMuxTxClk119 \
-    -group casMuxTimingTxOutClk0 \
+    -group casMuxTimingTxOutClk0
     -group casMuxTxClk186 \
     -group casMuxTimingTxOutClk1
 
@@ -176,23 +162,19 @@ set_clock_groups -asynchronous \
     -group [get_clocks -include_generated_clocks {timingGtRxOutClk1}] \
     -group [get_clocks -include_generated_clocks {timingGtTxOutClk0}] \
     -group [get_clocks -include_generated_clocks {timingGtTxOutClk1}] \
-    -group [get_clocks -include_generated_clocks {clk238}] \
+    -group [get_clocks -include_generated_clocks {clk238}]  \
     -group [get_clocks -include_generated_clocks {clk371}] \
     -group [get_clocks -include_generated_clocks {dmaClk}]
-
-set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins U_userClk25/PllGen.U_Pll/CLKOUT0]] -group [get_clocks -of_objects [get_pins U_axilClk/MmcmGen.U_Mmcm/CLKOUT0]]
-set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins {U_Hsio/U_TimingRx/GEN_VEC[0].U_refClkDiv2/O}]] -group [get_clocks -of_objects [get_pins {U_Hsio/U_TimingRx/GEN_VEC[0].REAL_PCIE.U_GTY/LOCREF_G.U_TimingGtyCore/inst/gen_gtwizard_gtye4_top.TimingGty_fixedlat_gtwizard_gtye4_inst/gen_gtwizard_gtye4.gen_channel_container[3].gen_enabled_channel.gtye4_channel_wrapper_inst/channel_inst/gtye4_channel_gen.gen_gtye4_channel_inst[0].GTYE4_CHANNEL_PRIM_INST/TXOUTCLKPCS}]]
-
-set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins {U_Hsio/U_CXPoF/GEN_LANE[*].U_CXPoF/U_GT/inst/i_CoaXPressOverFiberGtyUsIp_gt/inst/gen_gtwizard_gtye4_top.CoaXPressOverFiberGtyUsIp_gt_gtwizard_gtye4_inst/gen_gtwizard_gtye4.gen_channel_container[29].gen_enabled_channel.gtye4_channel_wrapper_inst/channel_inst/gtye4_channel_gen.gen_gtye4_channel_inst[0].GTYE4_CHANNEL_PRIM_INST/TXOUTCLK}]] -group [get_clocks -of_objects [get_pins {U_Hsio/U_CXPoF/GEN_LANE[*].U_CXPoF/U_GT/inst/i_CoaXPressOverFiberGtyUsIp_gt/inst/gen_gtwizard_gtye4_top.CoaXPressOverFiberGtyUsIp_gt_gtwizard_gtye4_inst/gen_gtwizard_gtye4.gen_channel_container[29].gen_enabled_channel.gtye4_channel_wrapper_inst/channel_inst/gtye4_channel_gen.gen_gtye4_channel_inst[0].GTYE4_CHANNEL_PRIM_INST/RXOUTCLK}]]
-set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins {U_Hsio/U_CXPoF/GEN_LANE[*].U_CXPoF/U_GT/inst/i_CoaXPressOverFiberGtyUsIp_gt/inst/gen_gtwizard_gtye4_top.CoaXPressOverFiberGtyUsIp_gt_gtwizard_gtye4_inst/gen_gtwizard_gtye4.gen_channel_container[29].gen_enabled_channel.gtye4_channel_wrapper_inst/channel_inst/gtye4_channel_gen.gen_gtye4_channel_inst[0].GTYE4_CHANNEL_PRIM_INST/TXOUTCLKPCS}]] -group [get_clocks -of_objects [get_pins {U_Hsio/U_CXPoF/GEN_LANE[*].U_CXPoF/U_GT/inst/i_CoaXPressOverFiberGtyUsIp_gt/inst/gen_gtwizard_gtye4_top.CoaXPressOverFiberGtyUsIp_gt_gtwizard_gtye4_inst/gen_gtwizard_gtye4.gen_channel_container[29].gen_enabled_channel.gtye4_channel_wrapper_inst/channel_inst/gtye4_channel_gen.gen_gtye4_channel_inst[0].GTYE4_CHANNEL_PRIM_INST/TXOUTCLK}]]
-set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins {U_Hsio/U_CXPoF/GEN_LANE[*].U_CXPoF/U_GT/inst/i_CoaXPressOverFiberGtyUsIp_gt/inst/gen_gtwizard_gtye4_top.CoaXPressOverFiberGtyUsIp_gt_gtwizard_gtye4_inst/gen_gtwizard_gtye4.gen_channel_container[29].gen_enabled_channel.gtye4_channel_wrapper_inst/channel_inst/gtye4_channel_gen.gen_gtye4_channel_inst[0].GTYE4_CHANNEL_PRIM_INST/RXOUTCLK}]] -group [get_clocks -of_objects [get_pins {U_Hsio/U_CXPoF/GEN_LANE[*].U_CXPoF/U_phyClk312/PllGen.U_Pll/CLKOUT0}]]
-set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins {U_Hsio/U_CXPoF/GEN_LANE[*].U_CXPoF/U_GT/inst/i_CoaXPressOverFiberGtyUsIp_gt/inst/gen_gtwizard_gtye4_top.CoaXPressOverFiberGtyUsIp_gt_gtwizard_gtye4_inst/gen_gtwizard_gtye4.gen_channel_container[29].gen_enabled_channel.gtye4_channel_wrapper_inst/channel_inst/gtye4_channel_gen.gen_gtye4_channel_inst[0].GTYE4_CHANNEL_PRIM_INST/TXOUTCLK}]] -group [get_clocks -of_objects [get_pins {U_Hsio/U_CXPoF/GEN_LANE[*].U_CXPoF/U_phyClk312/PllGen.U_Pll/CLKOUT0}]]
-
-set_clock_groups -asynchronous -group [get_clocks casMuxRxClk119] -group [get_clocks -of_objects [get_pins {U_Hsio/U_CXPoF/GEN_LANE[0].U_CXPoF/U_phyClk312/PllGen.U_Pll/CLKOUT0}]]
-set_clock_groups -asynchronous -group [get_clocks casMuxRxClk186] -group [get_clocks -of_objects [get_pins {U_Hsio/U_CXPoF/GEN_LANE[0].U_CXPoF/U_phyClk312/PllGen.U_Pll/CLKOUT0}]]
-set_clock_groups -asynchronous -group [get_clocks casMuxTimingGtRxOutClk0] -group [get_clocks -of_objects [get_pins {U_Hsio/U_CXPoF/GEN_LANE[0].U_CXPoF/U_phyClk312/PllGen.U_Pll/CLKOUT0}]]
-set_clock_groups -asynchronous -group [get_clocks casMuxTimingGtRxOutClk1] -group [get_clocks -of_objects [get_pins {U_Hsio/U_CXPoF/GEN_LANE[0].U_CXPoF/U_phyClk312/PllGen.U_Pll/CLKOUT0}]]
 
 set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins {U_Hsio/U_CXPoF/GEN_LANE[0].U_CXPoF/U_phyClk312/PllGen.U_Pll/CLKOUT0}]] -group [get_clocks -of_objects [get_pins {U_Hsio/U_CXPoF/GEN_LANE[1].U_CXPoF/U_phyClk312/PllGen.U_Pll/CLKOUT0}]]
 set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins {U_Hsio/U_CXPoF/GEN_LANE[0].U_CXPoF/U_phyClk312/PllGen.U_Pll/CLKOUT0}]] -group [get_clocks -of_objects [get_pins {U_Hsio/U_CXPoF/GEN_LANE[2].U_CXPoF/U_phyClk312/PllGen.U_Pll/CLKOUT0}]]
 set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins {U_Hsio/U_CXPoF/GEN_LANE[0].U_CXPoF/U_phyClk312/PllGen.U_Pll/CLKOUT0}]] -group [get_clocks -of_objects [get_pins {U_Hsio/U_CXPoF/GEN_LANE[3].U_CXPoF/U_phyClk312/PllGen.U_Pll/CLKOUT0}]]
+set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins {U_Hsio/U_CXPoF/GEN_LANE[0].U_CXPoF/U_phyClk312/PllGen.U_Pll/CLKOUT0}]] -group [get_clocks casMuxRxClk119]
+set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins {U_Hsio/U_CXPoF/GEN_LANE[0].U_CXPoF/U_phyClk312/PllGen.U_Pll/CLKOUT0}]] -group [get_clocks casMuxRxClk186]
+set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins {U_Hsio/U_CXPoF/GEN_LANE[0].U_CXPoF/U_phyClk312/PllGen.U_Pll/CLKOUT0}]] -group [get_clocks casMuxTimingGtRxOutClk0]
+set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins {U_Hsio/U_CXPoF/GEN_LANE[0].U_CXPoF/U_phyClk312/PllGen.U_Pll/CLKOUT0}]] -group [get_clocks casMuxTimingGtRxOutClk1]
+set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins {U_Hsio/U_CXPoF/GEN_LANE[*].U_CXPoF/U_GT/inst/i_core_gtwiz_userclk_tx_inst_0/gen_gtwiz_userclk_tx_main.bufg_gt_usrclk2_inst/O}]] -group [get_clocks -of_objects [get_pins {U_Hsio/U_CXPoF/GEN_LANE[*].U_CXPoF/U_GT/inst/i_core_gtwiz_userclk_rx_inst_0/gen_gtwiz_userclk_rx_main.bufg_gt_usrclk2_inst/O}]]
+set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins {U_Hsio/U_CXPoF/GEN_LANE[*].U_CXPoF/U_GT/inst/i_core_gtwiz_userclk_tx_inst_0/gen_gtwiz_userclk_tx_main.bufg_gt_usrclk2_inst/O}]] -group [get_clocks -of_objects [get_pins {U_Hsio/U_CXPoF/GEN_LANE[*].U_CXPoF/U_GT/inst/i_core_gtwiz_userclk_rx_inst_0/gen_gtwiz_userclk_rx_main.bufg_gt_usrclk2_inst/O}]]
+set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins {U_Hsio/U_CXPoF/GEN_LANE[*].U_CXPoF/U_GT/inst/i_core_gtwiz_userclk_rx_inst_0/gen_gtwiz_userclk_rx_main.bufg_gt_usrclk2_inst/O}]] -group [get_clocks -of_objects [get_pins {U_Hsio/U_CXPoF/GEN_LANE[*].U_CXPoF/U_phyClk312/PllGen.U_Pll/CLKOUT0}]]
+set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins {U_Hsio/U_CXPoF/GEN_LANE[*].U_CXPoF/U_GT/inst/i_core_gtwiz_userclk_rx_inst_0/gen_gtwiz_userclk_rx_main.bufg_gt_usrclk2_inst/O}]] -group [get_clocks -of_objects [get_pins {U_Hsio/U_CXPoF/GEN_LANE[*].U_CXPoF/U_phyClk312/PllGen.U_Pll/CLKOUT0}]]
+set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins {U_Hsio/U_CXPoF/GEN_LANE[*].U_CXPoF/U_GT/inst/i_core_gtwiz_userclk_tx_inst_0/gen_gtwiz_userclk_tx_main.bufg_gt_usrclk2_inst/O}]] -group [get_clocks -of_objects [get_pins {U_Hsio/U_CXPoF/GEN_LANE[*].U_CXPoF/U_phyClk312/PllGen.U_Pll/CLKOUT0}]]

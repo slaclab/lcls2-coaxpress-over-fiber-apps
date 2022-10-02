@@ -1,0 +1,43 @@
+
+GitBase: ..
+
+TopRoguePackage: lcls2_coaxpress_over_fiber_apps
+
+RoguePackages:
+  - submodules/axi-pcie-core/python
+  - submodules/l2si-core/python
+  - submodules/lcls2-pgp-fw-lib/python
+  - submodules/lcls-timing-core/python
+  - submodules/surf/python
+  - python     
+
+RogueConfig:
+  - ../software/config
+
+RogueScripts:
+  - submodules/axi-pcie-core/scripts/updatePcieFpga.py
+  - ../software/scripts/devGui.py
+
+Targets:
+  Lcls2CoaxpressOverFiberXilinxAlveoU200:
+    ImageDir: targets/Lcls2CoaxpressOverFiberXilinxAlveoU200/images
+    Extensions:
+      - mcs      
+  Lcls2CoaxpressOverFiberXilinxKcu1500:
+    ImageDir: targets/Lcls2CoaxpressOverFiberXilinxKcu1500/images
+    Extensions:
+      - mcs
+  Lcls2CoaxpressOverFiberXilinxVariumC1100:
+    ImageDir: targets/Lcls2CoaxpressOverFiberXilinxVariumC1100/images
+    Extensions:
+      - mcs
+
+Releases:
+  all:
+    Primary: True
+    Targets:
+      - Lcls2CoaxpressOverFiberXilinxAlveoU200
+      - Lcls2CoaxpressOverFiberXilinxKcu1500
+      - Lcls2CoaxpressOverFiberXilinxVariumC1100
+    Types:
+      - Rogue

@@ -179,7 +179,7 @@ class Root(shared.Root):
             print ( '###################################################')
             axiVersion.printStatus()
             print ( '###################################################')
-            fwVersion = AxiVersion.FpgaVersion.get()
+            fwVersion = axiVersion.FpgaVersion.get()
             if (fwVersion != self.FwVersionLock):
                 errMsg = f"""
                     PCIe.AxiVersion.FpgaVersion = {fwVersion:#04x} != {self.FwVersionLock:#04x}
