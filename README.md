@@ -72,7 +72,7 @@ DMA.DEST[255:2] = Unused
 
 <!--- ######################################################## -->
 
-# Camera and Its Header Format
+# Camera Header and Camera Data Formats
 
 The SURF `CoaXPressRxHsFsm.vhd` firmware formats the camera header into a compact, 7 x 32-bit (little endianness) message.
 Refer to [Table 47 ― Rectangular image header](http://jiia.org/wp-content/themes/jiia/pdf/standard_dl/coaxpress/CXP-001-2021.pdf)
