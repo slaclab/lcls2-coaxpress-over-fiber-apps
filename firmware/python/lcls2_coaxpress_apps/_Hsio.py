@@ -31,8 +31,9 @@ class Hsio(pr.Device):
 
         # Add Timing Core
         self.add(shared.TimingRx(
-            name     = 'TimingRx',
-            offset   = 0x0010_0000,
-            enLclsI  = enLclsI,
-            enLclsII = enLclsII,
+            name         = 'TimingRx',
+            offset       = 0x0010_0000,
+            numDetectors = 1,
+            enLclsI      = enLclsI,
+            enLclsII     = enLclsII,
         ))

@@ -87,9 +87,9 @@ if __name__ == "__main__":
         "--pcieBoardType",
         type     = str,
         required = False,
-        # default  = None,
-        default  = 'XilinxAlveoU200',
-        help     = "define the type of PCIe card, used to select I2C mapping. Options: [none or SlacPgpCardG4 or Kcu1500]",
+        default  = None,
+        # default  = 'XilinxAlveoU200',
+        help     = "define the type of PCIe card, used to select I2C mapping",
     )
 
     parser.add_argument(

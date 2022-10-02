@@ -1,0 +1,15 @@
+Root:
+  Fpga:
+    Hsio:
+      CoaXPressAxiL:
+        RxNumberOfLane: 4 # Enable 4 lanes
+        TrigPulseWidth: 100.0 # units of us
+  PhantomS991:
+    enable: true
+    LinkNumberReg: Banks_A # Only using QSFP_A (4 lanes) and not QSFP_B (other 4 lanes)
+    PixelFormatReg: Mono8
+    TriggerModeReg: TriggerModeOn
+    TriggerSelectorReg: ExposureActive
+    TriggerSourceReg: SWTRIGGER
+    WidthReg: 4096 # In units of pixels
+    HeightReg: 2304 # In units of pixels

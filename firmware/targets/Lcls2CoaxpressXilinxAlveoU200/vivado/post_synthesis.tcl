@@ -18,7 +18,7 @@ source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
 # Bypass the debug chipscope generation via return cmd
 # ELSE ... comment out the return to include chipscope
 ######################################################
-# return
+return
 
 ############################
 ## Open the synthesis design
@@ -42,228 +42,85 @@ CreateDebugCore ${ilaName}
 #######################
 ## Set the record depth
 #######################
-set_property C_DATA_DEPTH 1024 [get_debug_cores ${ilaName}]
+set_property C_DATA_DEPTH 8192 [get_debug_cores ${ilaName}]
 
 #################################
 ## Set the clock for the ILA core
 #################################
-SetDebugCoreClk ${ilaName} {U_Hsio/axilClk}
+SetDebugCoreClk ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Mux/rxClk}
 
 #######################
 ## Set the debug Probes
 #######################
 
-
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Config/axilReadMaster[araddr][*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Config/axilWriteMaster[awaddr][*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Config/axilWriteMaster[wdata][*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Config/configTimerSize[*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Config/r[axilReadSlave][rdata][*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Config/r[axilReadSlave][rresp][*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Config/r[axilWriteSlave][bresp][*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Config/r[state][*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Config/r[timer][*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Config/axilReadMaster[arvalid]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Config/axilReadMaster[rready]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Config/r[axilReadSlave][arready]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Config/r[axilReadSlave][rvalid]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Config/r[axilWriteSlave][awready]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Config/r[axilWriteSlave][bvalid]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Config/r[axilWriteSlave][wready]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Config/cfgRxMaster[tData][*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Config/cfgRxMaster[tValid]}
-
-
-##########################
-## Write the port map file
-##########################
-WriteDebugProbes ${ilaName}
-
-##############################################################################
-##############################################################################
-##############################################################################
-
-###############################
-## Set the name of the ILA core
-###############################
-set ilaName u_ila_1
-
-##################
-## Create the core
-##################
-CreateDebugCore ${ilaName}
-
-#######################
-## Set the record depth
-#######################
-set_property C_DATA_DEPTH 1024 [get_debug_cores ${ilaName}]
-
-#################################
-## Set the clock for the ILA core
-#################################
-SetDebugCoreClk ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_Bridge/GEN_TX.U_Tx/clk}
-
-#######################
-## Set the debug Probes
-#######################
-
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Tx/U_HsFsm/cfgMaster[tData][*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Tx/U_HsFsm/cfgMaster[tUser][*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Tx/U_HsFsm/r[txData][*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Tx/U_HsFsm/r[txDataK][*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Tx/U_HsFsm/r[txTrigCnt][*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Tx/U_HsFsm/txTrig[*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Tx/U_HsFsm/cfgMaster[tValid]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Tx/U_HsFsm/cfgSlave[tReady]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Tx/U_HsFsm/r[forceIdle]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Tx/U_HsFsm/txRst}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Tx/U_HsFsm/r[txTrigDrop]}
-
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Tx/U_LsFsm/cfgMaster[tData][*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Tx/U_LsFsm/cfgMaster[tUser][*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Tx/U_LsFsm/r[heartbeatCnt][*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Tx/U_LsFsm/r[txTrigData][5][*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Tx/U_LsFsm/r[txData][*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Tx/U_LsFsm/r[txIdleCnt][*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Tx/U_LsFsm/r[txTrigCnt][*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Tx/U_LsFsm/cfgMaster[tValid]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Tx/U_LsFsm/cfgSlave[tReady]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Tx/U_LsFsm/r[heartbeat]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Tx/U_LsFsm/r[txDataK]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Tx/U_LsFsm/r[txIdle]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Tx/U_LsFsm/r[txStrobe]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Tx/U_LsFsm/r[txTrig]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Tx/U_LsFsm/r[txTrigDrop]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Tx/U_LsFsm/txRate}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Tx/U_LsFsm/txTrig}
-
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_Bridge/GEN_TX.U_Tx/r[cnt][*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_Bridge/GEN_TX.U_Tx/r[state][*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_Bridge/GEN_TX.U_Tx/r[txHsData][*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_Bridge/GEN_TX.U_Tx/r[txLsData][*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_Bridge/GEN_TX.U_Tx/txLsLaneEn[*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_Bridge/GEN_TX.U_Tx/r[txLsDataK]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_Bridge/GEN_TX.U_Tx/r[xgmiiTxc][*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_Bridge/GEN_TX.U_Tx/r[xgmiiTxd][*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_Bridge/GEN_TX.U_Tx/txHsData[*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_Bridge/GEN_TX.U_Tx/txHsDataK[*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_Bridge/GEN_TX.U_Tx/txLsData[*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_Bridge/GEN_TX.U_Tx/txLsDataK}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_Bridge/GEN_TX.U_Tx/r[txHsEnable]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_Bridge/GEN_TX.U_Tx/r[txLsRate]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_Bridge/GEN_TX.U_Tx/r[update]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_Bridge/GEN_TX.U_Tx/rst}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_Bridge/GEN_TX.U_Tx/txHsEnable}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_Bridge/GEN_TX.U_Tx/txLsRate}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_Bridge/GEN_TX.U_Tx/txLsValid}
-
-##########################
-## Write the port map file
-##########################
-WriteDebugProbes ${ilaName}
-
-##############################################################################
-##############################################################################
-##############################################################################
-
-###############################
-## Set the name of the ILA core
-###############################
-set ilaName u_ila_2
-
-##################
-## Create the core
-##################
-CreateDebugCore ${ilaName}
-
-#######################
-## Set the record depth
-#######################
-set_property C_DATA_DEPTH 1024 [get_debug_cores ${ilaName}]
-
-#################################
-## Set the clock for the ILA core
-#################################
-SetDebugCoreClk ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_Bridge/U_Rx/clk}
-
-#######################
-## Set the debug Probes
-#######################
-
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_Bridge/U_Rx/r[rxData][0][*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_Bridge/U_Rx/r[rxData][1][*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_Bridge/U_Rx/r[rxDataK][0][*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_Bridge/U_Rx/r[rxDataK][1][*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_Bridge/U_Rx/r[state][*]}
 ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_Bridge/U_Rx/xgmiiRxc[*]}
 ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_Bridge/U_Rx/xgmiiRxd[*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_Bridge/U_Rx/r[armed]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_Bridge/U_Rx/rst}
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_Bridge/U_Rx/r[rxDataK][1][*]}
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_Bridge/U_Rx/r[rxData][1][*]}
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_Bridge/U_Rx/r[rxDataK][0][*]}
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_Bridge/U_Rx/r[rxData][0][*]}
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_Bridge/U_Rx/r[state][*]}
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_Bridge/U_Rx/r[errDet]}
 
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/GEN_LANE[0].U_Lane/r[ackCnt][*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/GEN_LANE[0].U_Lane/r[dcnt][*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/GEN_LANE[0].U_Lane/r[dsize][*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/GEN_LANE[0].U_Lane/r[state][*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/GEN_LANE[0].U_Lane/rxData[*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/GEN_LANE[0].U_Lane/rxDataK[*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/GEN_LANE[0].U_Lane/r[cfgMaster][tLast]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/GEN_LANE[0].U_Lane/r[cfgMaster][tValid]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/GEN_LANE[0].U_Lane/r[dataMaster][tLast]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/GEN_LANE[0].U_Lane/r[dataMaster][tValid]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/GEN_LANE[0].U_Lane/rxLinkUp}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/GEN_LANE[0].U_Lane/rxRst}
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/GEN_LANE[0].U_Lane/r[dbgCnt][*]}
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/GEN_LANE[0].U_Lane/r[errDet]}
 
-##########################
-## Write the port map file
-##########################
-WriteDebugProbes ${ilaName}
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Mux/numOfLane[*]}
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Mux/r[lane][*]}
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Mux/r[pipeMaster][tData][*]} 0 127
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Mux/r[pipeMaster][tUser][*]} 0 127
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Mux/r[pipeMaster][tKeep][*]} 0 15
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Mux/r[pipeMaster][tValid]}
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Mux/r[pipeMaster][tLast]}
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Mux/pipeSlave[tReady]}
 
-##############################################################################
-##############################################################################
-##############################################################################
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Mux/rxMasters[0][tData][*]} 0 127
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Mux/rxMasters[0][tKeep][*]} 0 15
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Mux/rxMasters[1][tData][*]} 0 127
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Mux/rxMasters[1][tKeep][*]} 0 15
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Mux/rxMasters[2][tData][*]} 0 127
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Mux/rxMasters[2][tKeep][*]} 0 15
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Mux/rxMasters[3][tData][*]} 0 127
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Mux/rxMasters[3][tKeep][*]} 0 15
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Mux/rxMasters[*][tValid]}
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Mux/rxMasters[*][tLast]}
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Mux/r[rxSlaves][*][tReady]}
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Mux/rxFsmRst}
 
-###############################
-## Set the name of the ILA core
-###############################
-set ilaName u_ila_3
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Fsm/rxMaster[tData][*]} 0 127
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Fsm/rxMaster[tKeep][*]}
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Fsm/rxMaster[tValid]}
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Fsm/rxSlave[tReady]}
 
-##################
-## Create the core
-##################
-CreateDebugCore ${ilaName}
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Fsm/r[hdrCnt][*]}
+# ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Fsm/r[hdr][pixelF][*]}
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Fsm/r[hdr][dsizeL][*]}
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Fsm/r[hdr][xSize][*]}
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Fsm/r[hdr][ySize][*]}
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Fsm/r[state][*]}
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Fsm/r[wrd][*]}
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Fsm/r[dCnt][*]}
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Fsm/r[yCnt][*]}
 
-#######################
-## Set the record depth
-#######################
-set_property C_DATA_DEPTH 1024 [get_debug_cores ${ilaName}]
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Fsm/r[dbg][errDet]}
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Fsm/r[dbg][wrd][*]}
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Fsm/r[dbg][cnt][*]}
+ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Fsm/r[dbg][maker][*]}
 
-#################################
-## Set the clock for the ILA core
-#################################
-SetDebugCoreClk ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/phyClk156}
+# ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Fsm/r[dataMasters][0][tData][*]} 0 127
+# ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Fsm/r[dataMasters][0][tKeep][*]} 0 15
+# ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Fsm/r[dataMasters][0][tLast]}
+# ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Fsm/r[dataMasters][0][tValid]}
 
-#######################
-## Set the debug Probes
-#######################
+# ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Fsm/r[dataMasters][1][tData][*]} 0 127
+# ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Fsm/r[dataMasters][1][tKeep][*]} 0 15
+# ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Fsm/r[dataMasters][1][tLast]}
+# ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Fsm/r[dataMasters][1][tValid]}
 
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/xgmiiTxd[*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/xgmiiTxc[*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/txReset}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/gt_reset_tx_done_out_0}
-
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_GT/stat_tx*}
-
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/xgmiiRxd[*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/xgmiiRxc[*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/rxReset}
-# ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/gt_reset_rx_done_out_0}
-
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_GT/stat_rx_error_0[*]}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_GT/stat_fec*}
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/U_GT/stat_rx*}
-
-ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/rxPhyRst}
-# ConfigProbe ${ilaName} {U_Hsio/U_CXP/GEN_LANE[0].GEN_CXPOF.U_CXPOF/gtRxReset}
+# ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Fsm/dataMaster[tData][*]}
+# ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Fsm/dataMaster[tKeep][*]}
+# ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Fsm/dataMaster[tLast]}
+# ConfigProbe ${ilaName} {U_Hsio/U_CXP/U_Core/U_Rx/U_Fsm/dataMaster[tValid]}
 
 ##########################
 ## Write the port map file

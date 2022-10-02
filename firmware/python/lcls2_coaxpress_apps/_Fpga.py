@@ -41,7 +41,7 @@ class Fpga(pr.Device):
         self.add(shared.Application(
             offset     = 0x00C0_0000,
             numLanes   = 1,
-            # expand     = True,
+            expand     = True,
         ))
         self.Application.AppLane[0].VcDataTap.hidden = True
         self.Application.AppLane[0].XpmPauseThresh.hidden = True

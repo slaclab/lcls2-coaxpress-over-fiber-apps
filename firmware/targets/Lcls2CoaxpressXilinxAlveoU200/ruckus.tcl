@@ -6,7 +6,8 @@ loadRuckusTcl $::env(TOP_DIR)/submodules/surf
 loadRuckusTcl $::env(PROJ_DIR)/../../submodules/lcls-timing-core
 loadRuckusTcl $::env(PROJ_DIR)/../../submodules/lcls2-pgp-fw-lib/shared
 loadRuckusTcl $::env(TOP_DIR)/submodules/axi-pcie-core/hardware/XilinxAlveoU200
-# loadRuckusTcl $::env(TOP_DIR)/submodules/axi-pcie-core/hardware/XilinxAlveoU200/ddr
+loadRuckusTcl $::env(TOP_DIR)/submodules/axi-pcie-core/hardware/XilinxAlveoU200/ddr
+loadRuckusTcl $::env(TOP_DIR)/shared
 
 # Load the l2si-core source code
 loadSource -lib l2si_core -dir "$::env(TOP_DIR)/submodules/l2si-core/xpm/rtl"

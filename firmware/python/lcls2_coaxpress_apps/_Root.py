@@ -21,7 +21,7 @@ import surf.protocols.batcher   as batcher
 import surf.protocols.coaxpress as coaxpress
 import l2si_core                as l2si
 
-rogue.Version.minVersion('5.14.0')
+rogue.Version.minVersion('5.15.0')
 
 class Root(shared.Root):
 
@@ -45,7 +45,7 @@ class Root(shared.Root):
         self.startupMode    = startupMode
         self.standAloneMode = standAloneMode
         self.cameraType     = cameraType
-        self.defaultFile    = []
+        self.defaultFile    = [f'config/{cameraType}.yml']
 
         # Check for simulation
         if dev == 'sim':
@@ -95,7 +95,7 @@ class Root(shared.Root):
             self.add(coaxpress.Bootstrap(
                 memBase        = self._srp,
                 CoaXPressAxiL  = self.Fpga.Hsio.CoaXPressAxiL,
-                expand         = True,
+                expand         = False,
                 enabled        = False,
             ))
 
@@ -106,6 +106,7 @@ class Root(shared.Root):
                     expand  = True,
                     enabled = False,
                 ))
+                self.camera = self.PhantomS991
 
         # Add local variables
         self.add(pr.LocalVariable(
@@ -122,6 +123,9 @@ class Root(shared.Root):
             # Get devices
             eventBuilder = self.find(typ=batcher.AxiStreamBatcherEventBuilder)
             trigger      = self.find(typ=l2si.TriggerEventBuffer)
+
+            # Turn off camera streaming
+            self.camera.AcquisitionStop()
 
             # Turn off the triggering
             for devPtr in trigger:
@@ -145,6 +149,9 @@ class Root(shared.Root):
             # Reset all counters
             self.CountReset()
 
+            # Turn on camera streaming
+            self.camera.AcquisitionStart()
+
             # Arm for data/trigger stream
             for devPtr in eventBuilder:
                 devPtr.Blowoff.set(False)
@@ -162,50 +169,55 @@ class Root(shared.Root):
 
         # Useful pointer
         timingRx = self.Fpga.Hsio.TimingRx
+        axiVersion = self.Fpga.AxiPcieCore.AxiVersion
 
         # Check if not simulation
         if (self.dev != 'sim'):
+
+            ###############################################################
+            print ( '###################################################')
+            axiVersion.printStatus()
+            print ( '###################################################')
+            ###############################################################
 
             # Connection reset
             self.Bootstrap.enable.set(True)
             self.Bootstrap.DeviceDiscovery()
 
-            # Check for different camera types
-            if self.cameraType == 'PhantomS991':
-                self.PhantomS991.enable.set(True)
+            ###############################################################
+
+            # Start up the timing system = LCLS-II mode
+            if self.startupMode:
+
+                # Set the default to  LCLS-II mode
+                defaultFile = ['config/defaults_LCLS-II.yml']
+
+                # Startup in LCLS-II mode
+                if self.standAloneMode:
+                    timingRx.ConfigureXpmMini()
+                else:
+                    timingRx.ConfigLclsTimingV2()
+
+            # Else LCLS-I mode
+            else:
+
+                # Set the default to  LCLS-I mode
+                defaultFile = ['config/defaults_LCLS-I.yml']
+
+                # Startup in LCLS-I mode
+                if self.standAloneMode:
+                    timingRx.ConfigureTpgMiniStream()
+                else:
+                    timingRx.ConfigLclsTimingV1()
+
+            # Load the YAML configurations
+            # self.defaultFile.extend(defaultFile)
+            # print( f'Loading {self.defaultFile} Configuration File...' )
+            self.LoadConfig(self.defaultFile)
+            self.LoadConfig(defaultFile)
+
+            # Read all the variables
             self.ReadAll()
-
-            # # Start up the timing system = LCLS-II mode
-            # if self.startupMode:
-
-                # # Set the default to  LCLS-II mode
-                # defaultFile = ['config/defaults_LCLS-II.yml']
-
-                # # Startup in LCLS-II mode
-                # if self.standAloneMode:
-                    # timingRx.ConfigureXpmMini()
-                # else:
-                    # timingRx.ConfigLclsTimingV2()
-
-            # # Else LCLS-I mode
-            # else:
-
-                # # Set the default to  LCLS-I mode
-                # defaultFile = ['config/defaults_LCLS-I.yml']
-
-                # # Startup in LCLS-I mode
-                # if self.standAloneMode:
-                    # timingRx.ConfigureTpgMiniStream()
-                # else:
-                    # timingRx.ConfigLclsTimingV1()
-
-            # # Load the YAML configurations
-            # defaultFile.extend(self.defaultFile)
-            # print( f'Loading {defaultFile} Configuration File...' )
-            # self.LoadConfig(defaultFile)
-
-            # # Read all the variables
-            # self.ReadAll()
 
     # Function calls after loading YAML configuration
     def initialize(self):

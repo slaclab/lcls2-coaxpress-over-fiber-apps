@@ -1,7 +1,7 @@
 -------------------------------------------------------------------------------
 -- Company    : SLAC National Accelerator Laboratory
 -------------------------------------------------------------------------------
--- Description: Lcls2 Coaxpress XilinxAlveoU200
+-- Description: Lcls2 Coaxpress Over Fiber XilinxAlveoU200
 -------------------------------------------------------------------------------
 -- This file is part of 'PGP PCIe APP DEV'.
 -- It is subject to the license terms in the LICENSE.txt file found in the
@@ -26,7 +26,7 @@ library lcls2_pgp_fw_lib;
 
 library axi_pcie_core;
 use axi_pcie_core.AxiPciePkg.all;
--- use axi_pcie_core.MigPkg.all;
+use axi_pcie_core.MigPkg.all;
 
 library unisim;
 use unisim.vcomponents.all;
@@ -53,11 +53,11 @@ entity Lcls2CoaxpressXilinxAlveoU200 is
       qsfp1RxN      : in    slv(3 downto 0);
       qsfp1TxP      : out   slv(3 downto 0);
       qsfp1TxN      : out   slv(3 downto 0);
-      -- -- DDR Ports
-      -- ddrClkP      : in    slv(3 downto 0);
-      -- ddrClkN      : in    slv(3 downto 0);
-      -- ddrOut       : out   DdrOutArray(3 downto 0);
-      -- ddrInOut     : inout DdrInOutArray(3 downto 0);
+      -- DDR Ports
+      ddrClkP       : in    slv(3 downto 0);
+      ddrClkN       : in    slv(3 downto 0);
+      ddrOut        : out   DdrOutArray(3 downto 0);
+      ddrInOut      : inout DdrInOutArray(3 downto 0);
       --------------
       --  Core Ports
       --------------
@@ -86,8 +86,7 @@ end Lcls2CoaxpressXilinxAlveoU200;
 
 architecture top_level of Lcls2CoaxpressXilinxAlveoU200 is
 
-   constant DMA_AXIS_CONFIG_C : AxiStreamConfigType := ssiAxiStreamConfig(64/8);  -- 512-bit interface
-   -- constant DMA_AXIS_CONFIG_C : AxiStreamConfigType := ssiAxiStreamConfig(512/8);  -- 512-bit interface
+   constant DMA_AXIS_CONFIG_C : AxiStreamConfigType := ssiAxiStreamConfig(512/8);  -- 512-bit interface
    constant AXIL_CLK_FREQ_C   : real                := 156.25E+6;  -- units of Hz
    constant DMA_SIZE_C        : positive            := 1;
 
@@ -142,10 +141,16 @@ architecture top_level of Lcls2CoaxpressXilinxAlveoU200 is
    signal ddrReadMasters  : AxiReadMasterArray(3 downto 0);
    signal ddrReadSlaves   : AxiReadSlaveArray(3 downto 0);
 
-   signal cameraIbMasters : AxiStreamMasterArray(DMA_SIZE_C-1 downto 0)     := (others => AXI_STREAM_MASTER_INIT_C);
-   signal cameraIbSlaves  : AxiStreamSlaveArray(DMA_SIZE_C-1 downto 0)      := (others => AXI_STREAM_SLAVE_FORCE_C);
-   signal cameraObMasters : AxiStreamQuadMasterArray(DMA_SIZE_C-1 downto 0) := (others => (others => AXI_STREAM_MASTER_INIT_C));
-   signal cameraObSlaves  : AxiStreamQuadSlaveArray(DMA_SIZE_C-1 downto 0)  := (others => (others => AXI_STREAM_SLAVE_FORCE_C));
+   signal dataMaster     : AxiStreamMasterType := AXI_STREAM_MASTER_INIT_C;
+   signal dataSlave      : AxiStreamSlaveType  := AXI_STREAM_SLAVE_FORCE_C;
+   signal imageHdrMaster : AxiStreamMasterType := AXI_STREAM_MASTER_INIT_C;
+   signal imageHdrSlave  : AxiStreamSlaveType  := AXI_STREAM_SLAVE_FORCE_C;
+
+   signal cfgIbMaster : AxiStreamMasterType := AXI_STREAM_MASTER_INIT_C;
+   signal cfgIbSlave  : AxiStreamSlaveType  := AXI_STREAM_SLAVE_FORCE_C;
+   signal cfgObMaster : AxiStreamMasterType := AXI_STREAM_MASTER_INIT_C;
+   signal cfgObSlave  : AxiStreamSlaveType  := AXI_STREAM_SLAVE_FORCE_C;
+
 
    signal eventTrigMsgMasters : AxiStreamMasterArray(DMA_SIZE_C-1 downto 0) := (others => AXI_STREAM_MASTER_INIT_C);
    signal eventTrigMsgSlaves  : AxiStreamSlaveArray(DMA_SIZE_C-1 downto 0)  := (others => AXI_STREAM_SLAVE_FORCE_C);
@@ -234,27 +239,27 @@ begin
          pciTxP         => pciTxP,
          pciTxN         => pciTxN);
 
---   --------------------
---   -- MIG[3:0] IP Cores
---   --------------------
---   U_Mig : entity axi_pcie_core.MigAll
---      generic map (
---         TPD_G => TPD_G)
---      port map (
---         extRst          => dmaRst,
---         -- AXI MEM Interface
---         axiClk          => ddrClk,
---         axiRst          => ddrRst,
---         axiReady        => ddrReady,
---         axiWriteMasters => ddrWriteMasters,
---         axiWriteSlaves  => ddrWriteSlaves,
---         axiReadMasters  => ddrReadMasters,
---         axiReadSlaves   => ddrReadSlaves,
---         -- DDR Ports
---         ddrClkP         => ddrClkP,
---         ddrClkN         => ddrClkN,
---         ddrOut          => ddrOut,
---         ddrInOut        => ddrInOut);
+   --------------------
+   -- MIG[3:0] IP Cores
+   --------------------
+   U_Mig : entity axi_pcie_core.MigAll
+      generic map (
+         TPD_G => TPD_G)
+      port map (
+         extRst          => dmaRst,
+         -- AXI MEM Interface
+         axiClk          => ddrClk,
+         axiRst          => ddrRst,
+         axiReady        => ddrReady,
+         axiWriteMasters => ddrWriteMasters,
+         axiWriteSlaves  => ddrWriteSlaves,
+         axiReadMasters  => ddrReadMasters,
+         axiReadSlaves   => ddrReadSlaves,
+         -- DDR Ports
+         ddrClkP         => ddrClkP,
+         ddrClkN         => ddrClkN,
+         ddrOut          => ddrOut,
+         ddrInOut        => ddrInOut);
 
    ---------------------
    -- AXI-Lite Crossbar
@@ -277,55 +282,49 @@ begin
          mAxiReadMasters     => axilReadMasters,
          mAxiReadSlaves      => axilReadSlaves);
 
---   -------------
---   -- DMA Buffer
---   -------------
---   U_MigDmaBuffer : entity axi_pcie_core.MigDmaBuffer
---      generic map (
---         TPD_G             => TPD_G,
---         DMA_SIZE_G        => DMA_SIZE_C,
---         DMA_AXIS_CONFIG_G => DMA_AXIS_CONFIG_C,
---         AXIL_BASE_ADDR_G  => AXIL_CONFIG_C(BUFF_INDEX_C).baseAddr)
---      port map (
---         -- AXI-Lite Interface (axilClk domain)
---         axilClk          => axilClk,
---         axilRst          => axilRst,
---         axilReadMaster   => axilReadMasters(BUFF_INDEX_C),
---         axilReadSlave    => axilReadSlaves(BUFF_INDEX_C),
---         axilWriteMaster  => axilWriteMasters(BUFF_INDEX_C),
---         axilWriteSlave   => axilWriteSlaves(BUFF_INDEX_C),
---         -- Trigger Event streams (eventClk domain)
---         eventClk         => axilClk,
---         eventTrigMsgCtrl => eventTrigMsgCtrl,
---         -- AXI Stream Interface (axisClk domain)
---         axisClk          => dmaClk,
---         axisRst          => dmaRst,
---         sAxisMasters     => buffIbMasters,
---         sAxisSlaves      => buffIbSlaves,
---         mAxisMasters     => dmaIbMasters,
---         mAxisSlaves      => dmaIbSlaves,
---         -- DDR AXI MEM Interface
---         ddrClk           => ddrClk,
---         ddrRst           => ddrRst,
---         ddrReady         => ddrReady,
---         ddrWriteMasters  => ddrWriteMasters,
---         ddrWriteSlaves   => ddrWriteSlaves,
---         ddrReadMasters   => ddrReadMasters,
---         ddrReadSlaves    => ddrReadSlaves);
-
-   -- Bypass for now to get faster build times
-   dmaIbMasters <= buffIbMasters;
-   buffIbSlaves <= dmaIbSlaves;
+   -------------
+   -- DMA Buffer
+   -------------
+   U_MigDmaBuffer : entity axi_pcie_core.MigDmaBuffer
+      generic map (
+         TPD_G             => TPD_G,
+         DMA_SIZE_G        => DMA_SIZE_C,
+         DMA_AXIS_CONFIG_G => DMA_AXIS_CONFIG_C,
+         AXIL_BASE_ADDR_G  => AXIL_CONFIG_C(BUFF_INDEX_C).baseAddr)
+      port map (
+         -- AXI-Lite Interface (axilClk domain)
+         axilClk          => axilClk,
+         axilRst          => axilRst,
+         axilReadMaster   => axilReadMasters(BUFF_INDEX_C),
+         axilReadSlave    => axilReadSlaves(BUFF_INDEX_C),
+         axilWriteMaster  => axilWriteMasters(BUFF_INDEX_C),
+         axilWriteSlave   => axilWriteSlaves(BUFF_INDEX_C),
+         -- Trigger Event streams (eventClk domain)
+         eventClk         => axilClk,
+         eventTrigMsgCtrl => eventTrigMsgCtrl,
+         -- AXI Stream Interface (axisClk domain)
+         axisClk          => dmaClk,
+         axisRst          => dmaRst,
+         sAxisMasters     => buffIbMasters,
+         sAxisSlaves      => buffIbSlaves,
+         mAxisMasters     => dmaIbMasters,
+         mAxisSlaves      => dmaIbSlaves,
+         -- DDR AXI MEM Interface
+         ddrClk           => ddrClk,
+         ddrRst           => ddrRst,
+         ddrReady         => ddrReady,
+         ddrWriteMasters  => ddrWriteMasters,
+         ddrWriteSlaves   => ddrWriteSlaves,
+         ddrReadMasters   => ddrReadMasters,
+         ddrReadSlaves    => ddrReadSlaves);
 
    ---------------------
    -- Application Module
    ---------------------
-   U_App : entity lcls2_pgp_fw_lib.Application
+   U_App : entity work.Application
       generic map (
          TPD_G             => TPD_G,
-         AXI_BASE_ADDR_G   => AXIL_CONFIG_C(APP_INDEX_C).baseAddr,
-         DMA_AXIS_CONFIG_G => DMA_AXIS_CONFIG_C,
-         DMA_SIZE_G        => DMA_SIZE_C)
+         DMA_AXIS_CONFIG_G => DMA_AXIS_CONFIG_C)
       port map (
          -- AXI-Lite Interface (axilClk domain)
          axilClk               => axilClk,
@@ -334,24 +333,28 @@ begin
          axilReadSlave         => axilReadSlaves(APP_INDEX_C),
          axilWriteMaster       => axilWriteMasters(APP_INDEX_C),
          axilWriteSlave        => axilWriteSlaves(APP_INDEX_C),
-         -- PGP Streams (axilClk domain)
-         pgpIbMasters          => cameraIbMasters,
-         pgpIbSlaves           => cameraIbSlaves,
-         pgpObMasters          => cameraObMasters,
-         pgpObSlaves           => cameraObSlaves,
+         -- Data Interface (axilClk domain)
+         dataMaster            => dataMaster,
+         dataSlave             => dataSlave,
+         imageHdrMaster        => imageHdrMaster,
+         imageHdrSlave         => imageHdrSlave,
+         -- Config Interface (axilClk domain)
+         cfgIbMaster           => cfgIbMaster,
+         cfgIbSlave            => cfgIbSlave,
+         cfgObMaster           => cfgObMaster,
+         cfgObSlave            => cfgObSlave,
          -- Trigger Event streams (axilClk domain)
-         eventTrigMsgMasters   => eventTrigMsgMasters,
-         eventTrigMsgSlaves    => eventTrigMsgSlaves,
-         eventTrigMsgCtrl      => open,  -- Using MigDmaBuffer instead
-         eventTimingMsgMasters => eventTimingMsgMasters,
-         eventTimingMsgSlaves  => eventTimingMsgSlaves,
+         eventTrigMsgMaster   => eventTrigMsgMasters(0),
+         eventTrigMsgSlave    => eventTrigMsgSlaves(0),
+         eventTimingMsgMaster => eventTimingMsgMasters(0),
+         eventTimingMsgSlave  => eventTimingMsgSlaves(0),
          -- DMA Interface (dmaClk domain)
          dmaClk                => dmaClk,
          dmaRst                => dmaRst,
-         dmaObMasters          => dmaObMasters,
-         dmaObSlaves           => dmaObSlaves,
-         dmaIbMasters          => buffIbMasters,
-         dmaIbSlaves           => buffIbSlaves);
+         dmaObMaster          => dmaObMasters(0),
+         dmaObSlave           => dmaObSlaves(0),
+         dmaIbMaster          => buffIbMasters(0),
+         dmaIbSlave           => buffIbSlaves(0));
 
    ------------------
    -- Hardware Module
@@ -381,15 +384,17 @@ begin
          -- Data Interface (dataClk domain)
          dataClk               => axilClk,
          dataRst               => axilRst,
-         dataMaster            => cameraObMasters(0)(1),  -- VC=1
-         dataSlave             => cameraObSlaves(0)(1),   -- VC=1
+         dataMaster            => dataMaster,
+         dataSlave             => dataSlave,
+         imageHdrMaster        => imageHdrMaster,
+         imageHdrSlave         => imageHdrSlave,
          -- Config Interface (cfgClk domain)
          cfgClk                => axilClk,
          cfgRst                => axilRst,
-         cfgIbMaster           => cameraIbMasters(0),     -- VC=0
-         cfgIbSlave            => cameraIbSlaves(0),      -- VC=0
-         cfgObMaster           => cameraObMasters(0)(0),  -- VC=0
-         cfgObSlave            => cameraObSlaves(0)(0),   -- VC=0
+         cfgIbMaster           => cfgIbMaster,
+         cfgIbSlave            => cfgIbSlave,
+         cfgObMaster           => cfgObMaster,
+         cfgObSlave            => cfgObSlave,
          -- Event interface
          eventClk              => axilClk,
          eventRst              => axilRst,

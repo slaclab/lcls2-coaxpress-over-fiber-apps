@@ -51,7 +51,7 @@ entity Hsio is
       DMA_AXIS_CONFIG_G : AxiStreamConfigType;
       AXIL_CLK_FREQ_G   : real                 := 156.25E+6;  -- units of Hz
       AXI_BASE_ADDR_G   : slv(31 downto 0)     := x"0080_0000";
-      DMA_SIZE_G        : integer range 1 to 4 := 1);
+      DMA_SIZE_G        : integer range 1 to 1 := 1);
    port (
       ------------------------
       --  Top Level Interfaces
@@ -72,6 +72,8 @@ entity Hsio is
       dataRst               : in  sl;
       dataMaster            : out AxiStreamMasterType;
       dataSlave             : in  AxiStreamSlaveType;
+      imageHdrMaster        : out AxiStreamMasterType;
+      imageHdrSlave         : in  AxiStreamSlaveType;
       -- Config Interface (cfgClk domain)
       cfgClk                : in  sl;
       cfgRst                : in  sl;
@@ -198,7 +200,6 @@ begin
          TPD_G              => TPD_G,
          CXP_RATE_G         => CXP_12_C,
          NUM_LANES_G        => 4,
-         TRIG_WIDTH_G       => 1,
          STATUS_CNT_WIDTH_G => 12,
          AXIL_BASE_ADDR_G   => AXIL_CONFIG_C(CAMERA_INDEX_C).baseAddr,
          AXIL_CLK_FREQ_G    => AXIL_CLK_FREQ_G,
@@ -218,12 +219,14 @@ begin
          -- Trigger Interface (trigClk domain)
          trigClk         => trigClk,
          trigRst         => trigRst,
-         trigger         => remoteTriggers,
+         trigger         => remoteTriggers(0),
          -- Data Interface (dataClk domain)
          dataClk         => dataClk,
          dataRst         => dataRst,
          dataMaster      => dataMaster,
          dataSlave       => dataSlave,
+         imageHdrMaster  => imageHdrMaster,
+         imageHdrSlave   => imageHdrSlave,
          -- Config Interface (cfgClk domain)
          cfgClk          => cfgClk,
          cfgRst          => cfgRst,
