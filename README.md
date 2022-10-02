@@ -52,7 +52,6 @@ QSFP[1][0] = LCLS-I  Timing Receiver
 QSFP[1][1] = LCLS-II Timing Receiver
 QSFP[1][2] = Unused QSFP Link
 QSFP[1][3] = Unused QSFP Link
-SFP = Unused SFP Link
 ```
 
 <!--- ######################################################## -->
