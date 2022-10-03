@@ -15,16 +15,12 @@ RogueConfig:
   - ../software/config
 
 RogueScripts:
-  - submodules/axi-pcie-core/scripts/updatePcieFpga.py
+  - ../software/scripts/updatePcieFpga.py
   - ../software/scripts/devGui.py
 
 Targets:
   Lcls2CoaxpressOverFiberXilinxAlveoU200:
     ImageDir: targets/Lcls2CoaxpressOverFiberXilinxAlveoU200/images
-    Extensions:
-      - mcs      
-  Lcls2CoaxpressOverFiberXilinxKcu1500:
-    ImageDir: targets/Lcls2CoaxpressOverFiberXilinxKcu1500/images
     Extensions:
       - mcs
   Lcls2CoaxpressOverFiberXilinxVariumC1100:
@@ -37,7 +33,6 @@ Releases:
     Primary: True
     Targets:
       - Lcls2CoaxpressOverFiberXilinxAlveoU200
-      - Lcls2CoaxpressOverFiberXilinxKcu1500
       - Lcls2CoaxpressOverFiberXilinxVariumC1100
     Types:
       - Rogue
