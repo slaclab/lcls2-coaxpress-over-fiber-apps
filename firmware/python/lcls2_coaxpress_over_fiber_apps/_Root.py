@@ -200,7 +200,7 @@ class Root(shared.Root):
             if self.startupMode:
 
                 # Set the default to  LCLS-II mode
-                defaultFile = ['config/defaults_LCLS-II.yml']
+                configFile = ['config/defaults_LCLS-II.yml']
 
                 # Startup in LCLS-II mode
                 if self.standAloneMode:
@@ -212,7 +212,7 @@ class Root(shared.Root):
             else:
 
                 # Set the default to  LCLS-I mode
-                defaultFile = ['config/defaults_LCLS-I.yml']
+                configFile = ['config/defaults_LCLS-I.yml']
 
                 # Startup in LCLS-I mode
                 if self.standAloneMode:
@@ -220,17 +220,10 @@ class Root(shared.Root):
                 else:
                     timingRx.ConfigLclsTimingV1()
 
-            ######################################################################
-            # Commented out and loading individual YAML files due to new rogue bug
-            ######################################################################
-            # https://jira.slac.stanford.edu/browse/ESROGUE-603
-            ######################################################################
-            # # Load the YAML configurations
-            # self.defaultFile.extend(defaultFile)
-            # print( f'Loading {self.defaultFile} Configuration File...' )
-            ######################################################################
+            # Load the YAML configurations
+            self.defaultFile.extend(configFile)
+            print(f'Loading {self.defaultFile} Configuration File...')
             self.LoadConfig(self.defaultFile)
-            self.LoadConfig(defaultFile)
 
             # Read all the variables
             self.ReadAll()
