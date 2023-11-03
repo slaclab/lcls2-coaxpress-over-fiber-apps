@@ -14,6 +14,8 @@ import sys
 import time
 import argparse
 import importlib
+
+import pyrogue
 import rogue
 
 if __name__ == "__main__":
@@ -179,16 +181,8 @@ if __name__ == "__main__":
         # No GUI
         #################
         elif (args.guiType == 'None'):
-
-            # Wait to be killed via Ctrl-C
-            print('Running root server.  Hit Ctrl-C to exit')
-            try:
-                while True:
-                    time.sleep(1)
-            except:
-                pass
-            print('Stopping root server...')
-            root.stop()
+            print("Running without GUI...")
+            pyrogue.waitCntrlC()
 
         ####################
         # Undefined GUI type
